@@ -1,8 +1,3 @@
-(define (mult6 x)
-  (* x 4))
-
-(+ 3 2)
-
 (define (factorial n)
   (if (= n 1)
       1
@@ -17,7 +12,6 @@
       (fact-iter (* counter product)
 		 (+ counter 1)
 		 max-count)))
-(factorial 20)
 
 (define (A x y)
   (cond ((= y 0) 0)
@@ -30,7 +24,12 @@
 	((>= 3) ( + (f (- n 1)) (* 2 (f (- n 2))) (* 3 (f (- n 3))))
 	)))
 
+; computes values in Pascal's triangle
+; i is the level starting with 1 at topmost
+; j is the element starting at 1 
 
-(f 2)
-
-(+ 3 2 1)
+(define (f i j)
+  (cond ((= j 1) 1)
+	((= i j) 1)
+	(else (+ (f (- i 1) (- j 1)) (f (- i 1) j)))
+	))
