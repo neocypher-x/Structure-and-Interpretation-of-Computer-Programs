@@ -14,16 +14,15 @@
 		 max-count)))
 
 ; Ackerman's function
-
 (define (A x y)
   (cond ((= y 0) 0)
 	((= x 0) (* 2 y))
 	((= y 1) 2)
 	(else (A (- x 1)
 		 (A x (- y 1))))))
+
 ; f(n) = f(n-1) + 2 f(n-2) + 3 f(n-3)
 ; both recursive and iterative implementations
-
 (define (f n)
   (cond ((< n 3) n)
 	((>= 3) ( + (f (- n 1)) (* 2 (f (- n 2))) (* 3 (f (- n 3))))
@@ -40,9 +39,34 @@
 ; computes values in Pascal's triangle
 ; i is the level starting with 1 at topmost
 ; j is the element starting at 1 
-
 (define (f i j)
   (cond ((= j 1) 1)
 	((= i j) 1)
 	(else (+ (f (- i 1) (- j 1)) (f (- i 1) j)))
 	))
+
+; Recursive version
+(define (expt b n)
+  (if (= n 0)
+      1
+      (* b (expt b (- n 1)))))
+
+;Iterative version
+(define (expt b n)
+  (expt-iter b n 1))
+
+(define (expt-iter b counter product)
+  (if (= counter 0)
+      product
+      (expt-iter b
+		 (- counter 1)
+		 (* b product))))
+
+;fast version
+(define (fast-expt b n)
+  (cond ((= n 0) 1)
+	((even? n) (square (fast-expt b (/ n 2))))
+	(else (* b (fast-expt b (- n 1))))))
+
+(define (even? n)
+  (= (remainder n 2) 0))
