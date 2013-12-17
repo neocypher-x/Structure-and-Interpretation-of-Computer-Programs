@@ -435,17 +435,6 @@
 
 ; Section 1.3.3
 
-
-
-
-
-
-
-
-
-
-
-
 ; 1.35
 (define tolerance 0.0001)
 (define (fixed-point f first-guess)
@@ -487,49 +476,43 @@
 ; 1.37
 (define (cont-frac n d k)
   (define (iter i result)
-    (if (= i k)
-        (/ (n i) (d i))
-        (+ result (iter (+ i 1)
+    (if (= i 0)
+	result
+	(iter (- i 1)
+	      (/ (n i) (+ (d i) result)))))
+  (iter k 0.0))
 
 (define (cont-frac n d k)
-  (if (= 1 k)
-      (/ (n 1) (d 1))
+  (define (recur i)
+    (if (> i k)
+	0
+	(/ (n i) (+ (d i) (recur (add1 i))))))
+  (recur 1))
 
+; approximation to inverse golden ratio
+(cont-frac (lambda (i) 1.0)
+	   (lambda (i) 1.0)
+	   20)
 
+; 1.38
+(define (e-approx k)
+  (+ 2.0
+     (cont-frac (lambda (i) 1)
+		(lambda (i)
+		  (if (= 2 (remainder i 3))
+		      (/ (+ i 1) 1.5)
+		      1))
+		k)))
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+; 1.39
+(define (tan-cf x k)
+  (cont-frac (lambda (i)
+	       (if (= i 1) x (- (* x x))))
+	     (lambda (i)
+	       (- (* i 2) 1))
+	     k))
 
 ; Section 1.3.4
-
-
-
-
-
-
-
-
-
 
 ; Newton's Method
 (define (deriv g)
@@ -562,27 +545,7 @@
 (define (sqrt x)
   (fixed-point-of-transform (lambda (y) (- (square y) x))
                             newton-transform
-                            1.0))
-                                         
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+			    1.0))
 
 (define (average x y)
   (/ (+ x y) 2))
