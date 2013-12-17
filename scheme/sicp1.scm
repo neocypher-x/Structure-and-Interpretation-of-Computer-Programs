@@ -250,6 +250,63 @@
 	((divides? test-divisor n) test-divisor)
 	(else (find-divisor n (next test-divisor)))))
 
+(define (fast-expt b n)
+  (cond ((= n 0) 1)
+        ((even? n) (square (fast-expt b (/ n 2))))
+        (else (* b (fast-expt b (- n 1))))))
+
+(define (expmod base exp m)
+  (cond ((= exp 0) 1)
+        ((even? exp)
+         (remainder (* (expmod base (/ exp 2) m)
+                       (expmod base (/ exp 2) m))
+                    m))
+        (else
+         (remainder (* base (expmod base (- exp 1) m))
+                    m))))
+
+; 1.25
+
+(define (expmod base exp m)
+  (remainder (fast-expt base exp) m))
+
+; this is correct. It would also serve our fast-prime-tester
+
+; 1.26
+; the square procedure would only require 1 call of expmod
+; Upon evaluation of expmod, it would then multiply their
+; values. However, Louis has now made 2 calls of expmod,
+; doubling the number of expmod calls for each level of 
+; the recursion tree.
+
+; 1.27
+
+(define (fermat-test n)
+  (define (try-it a)
+    (= (expmod a n n) a))
+  (try-it (+ 1 (random (- n 1)))))
+
+(define (test n x)
+  (display x)
+  (display (= (expmod x n n) x))
+  (newline)
+  (if (< (+ x 1) n) (test n (+ x 1))
+      (+ n 0)))
+
+; This procedure takes an integer n and performs
+; the Fermat test on *all* integers less than n
+; and greater than 0. It returns true if Fermat's
+; Little Theorem holds true for all integers less
+; than n and greater than 1, and false otherwise.
+(define (fermatall n)
+  (define (helper n x)
+    (if (= (expmod x n n) x)
+        (if (< (+ x 1) n)
+            (helper n (+ x 1))
+            #t)
+        #f))
+  (helper n 1))
+
 ; 1.28
 ; this took a while to understand
 
@@ -298,7 +355,234 @@
       (* 5 (f a))
       0))
 
+; 1.29
+(define (simpsons f a b n)
+  (define h
+    (/ (- b a)
+       n))
+  (define (add-h x)
+    (+ x (/ (- b a) n)))
+  (define (f-term c)
+    (if (remainder (/ (- c a) h)
+                   2
+  (* (/ (/ (- b a) n) 3)
+     (sum f-term a add-h b)))
+
+(define (simpsons f a b n)
+  (define (sum-ext
+
+; 1.30
+(define (sum term a next b)
+  (define (iter a result)
+    (if (> a b)
+        result
+        (iter (next a) (+ (term a) result))))
+  (iter a 0))
+
+; 1.31
+(define (product term a next b)
+  (if (> a b)
+      1
+      (* (term a)
+         (product term (next a) next b))))
+(define (factorial n)
+  (product identity 1 inc n))
+
+(define (product-iter term a next b)
+  (define (iter a result)
+    (if (> a b)
+        result
+        (iter (next a) (* (term a) result))))
+  (iter (term a) 1))
+
+(define (pi-product n)
+  (define (pi-term x)
+    (if (= 1 (remainder x 2))
+        (/ (+ x 1) (+ x 2))
+        (/ (+ x 2) (+ x 1))))
+  (* (product pi-term 1 inc n)
+     4))
+
+; 1.32
+(define (accumulator combiner null-value term a next b)
+  (if (> a b)
+      null-value
+      (combiner (term a)
+                (accumulator combiner null-value term (next a) next b))))
+
+(define (accumulator-iter combiner null-value term a next b)
+  (define (iter a result)
+    (if (> a b)
+        result
+        (iter (next a) (combiner (term a) result))))
+  (iter a null-value))
+
+; 1.33
+(define (filtered-accumulate combiner null-value term a next b filterp)
+  (if (> a b)
+      null-value
+      (if (filterp a)
+          (combiner (term a)
+                    (filtered-accumulate combiner null-value term (next a) next b filterp))
+          (combiner null-value
+                    (filtered-accumulate combiner null-value term (next a) next b filterp)))))
+
+;a a=1 b=5
+(filtered-accumulate + 0 cube 1 inc 5 prime?)
+
+;b n=7
+(filtered-accumulate * 1 identity 1 inc 7 rel-prime?)
+
+; Section 1.3.3
+
+
+
+
+
+
+
+
+
+
+
+
+; 1.35
+(define tolerance 0.0001)
+(define (fixed-point f first-guess)
+  (define (close-enough? v1 v2)
+    (< (abs (- v1 v2)) tolerance))
+  (define (try guess)
+    (let ((next (f guess)))
+      (if (close-enough? guess next)
+          next
+          (try next))))
+  (try first-guess))
+
+(fixed-point (lambda (x) (+ (/ 1 x) 1)) 2.0)
+
+; 1.36
+(define (fixed-point f first-guess)
+  (define (close-enough? v1 v2)
+    (< (abs (- v1 v2)) tolerance))
+  (define (try guess)
+    (let ((next (f guess)))
+      (display next)
+      (newline)
+      (if (close-enough? guess next)
+          next
+          (try next))))
+  (try first-guess))
+
+(fixed-point (lambda (x) (/ (log 1000) (log x))) 10)
+
+(define (average x y)
+  (* (+ x y)
+     (/ 1 2)))
+
+(define (exp-fixed x)
+  (fixed-point (lambda (y) (average y (/ (log x) (log y))))
+
+               10))
+
+; 1.37
+(define (cont-frac n d k)
+  (define (iter i result)
+    (if (= i k)
+        (/ (n i) (d i))
+        (+ result (iter (+ i 1)
+
+(define (cont-frac n d k)
+  (if (= 1 k)
+      (/ (n 1) (d 1))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ; Section 1.3.4
+
+
+
+
+
+
+
+
+
+
+; Newton's Method
+(define (deriv g)
+  (lambda (x)
+    (/ (- (g (+ x dx)) (g x))
+       dx)))
+(define dx 0.00001)
+
+(define (cube x) (* x x x))
+((deriv cube) 5)
+
+(define (newton-transform g)
+  (lambda (x)
+    (- x (/ (g x) ((deriv g) x)))))
+(define (newtons-method g guess)
+  (fixed-point (newton-transform g) guess))
+
+(define (sqrt x)
+  (newtons-method (lambda (y) (- (square y) x))
+                  1.0))
+
+(define (fixed-point-of-transform g transform guess)
+  (fixed-point (transform g) guess))
+(define (sqrt x)
+  (fixed-point-of-transform (lambda (y) (/ x y))
+                            average-damp
+                            1.0))
+(define (average-damp f)
+  (lambda (x) (average x (f x))))
+(define (sqrt x)
+  (fixed-point-of-transform (lambda (y) (- (square y) x))
+                            newton-transform
+                            1.0))
+                                         
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 (define (average x y)
   (/ (+ x y) 2))
@@ -322,7 +606,7 @@
     (/ (- (g (+ x dx)) (g x))
        dx)))
 
-(define (newton-transform g)
+ (newton-transform g)
   (lambda (x)
     (- x (/ (g x) ((deriv g) x)))))
 (define (newtons-method g guess)
