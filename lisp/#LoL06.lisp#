@@ -1,0 +1,10 @@
+(defun say-hello ()
+  (print "Please type your name:")
+  (let ((name (read)))
+    (print "Nice to meet you, ")
+    (print name)))
+
+(defun add-five ()
+  (print "please enter a number:")
+  (let ((num read)))
+  
