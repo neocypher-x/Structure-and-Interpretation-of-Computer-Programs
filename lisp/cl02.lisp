@@ -27,6 +27,8 @@
        (or (null (car x))
 	   (enigma (cdr x)))))
 
+; Returns the index in y where x appears, or nil
+; if x does not appear in y
 (defun mystery (x y)
   (if (null y)
       nil
@@ -35,6 +37,40 @@
       (let ((z (mystery x (cdr y))))
 	(and z (+ z 1))))))
 
+;6
 (car (car (cdr '(a (b c) d))))
-(/ 13 (/ 1 0))
-(func #'list 1 nil)
+(or 13 (/ 1 0))
+(apply #'list 1 nil)
+
+;7
+(defun listlist (lst)
+  (if (null lst)
+      nil
+      (if (listp (car lst))
+	  't
+	  (listlist (cdr lst)))))
+
+;8
+(defun print-dots (n)
+  (format t ". ")
+  (if (= n 1)
+      nil
+      (print-dots (- n 1))))
+
+(defun print-dots (n)
+  (do ((i 1 (+ i 1)))
+      ((> i n))
+      (format t ". ")))
+
+(defun nfind (x lst)
+  (if (null lst)
+      0
+      (if (eql x (car lst))
+	  (+ 1 (nfind x (cdr lst)))
+	  (nfind x (cdr lst)))))
+
+(defun nfind (x lst)
+  (do ((i (car lst) (car (cdr lst))))
+      ((null i))
+      (if (eql x i)
+	  (
