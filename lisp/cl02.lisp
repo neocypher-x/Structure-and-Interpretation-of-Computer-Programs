@@ -69,8 +69,28 @@
 	  (+ 1 (nfind x (cdr lst)))
 	  (nfind x (cdr lst)))))
 
-(defun nfind (x lst)
-  (do ((i (car lst) (car (cdr lst))))
-      ((null i))
-      (if (eql x i)
-	  (
+(defun nfind (obj lst)
+  (let ((n 0))
+    (dolist (x lst)
+      (if (eql x obj)
+	  (setf n (+ n 1))))
+	n))
+
+(defun nfind (obj lst)
+  (let ((n 0))
+    (dolist (x lst)
+      (format t "~A " (eql x obj)))
+    n))
+
+;9
+(defun summit (lst)
+  (let ((l (remove nil lst)))
+    (apply #'+ l)))
+
+(defun summit (lst)
+  (let ((x (car lst)))
+    (if (null x)
+	(if (null (cdr lst))
+	    0
+	  (+ 0 (summit (cdr lst))))
+        (+ x (summit (cdr lst))))))
