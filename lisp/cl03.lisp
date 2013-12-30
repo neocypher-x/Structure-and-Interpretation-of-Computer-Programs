@@ -7,11 +7,30 @@
   (let ((lst lst1))
     (mapcar #'(lambda (x)
 		(if (not (member x lst1))
+		    ; could also use (push x (cdr (last lst)))
 		    (setf lst (append lst (list x)))))
 	    lst2)
     lst))
 
 (new-union '(a b c) '(1 2 3))
+
+; 3
+(setf hash '((a . x) (b . y) (c . z)))
+(assoc 'a hash)
+
+(defun occurences (alst)
+  (let ((ret nil))
+    (if (consp alst)
+	(progn
+	  (mapcar #'(lambda (x)
+		    (if (assoc x ret)
+			(incf (cdr (assoc x ret)))
+		        (push (cons x 1) ret)))
+		alst)
+	  (sort ret #'> :key #'cdr)))
+    ret))
+
+(occurences '(a b a d a c d c a))
 
 ; 4
 ; (member '(a) '((a) (b))) implicitly uses
@@ -42,3 +61,9 @@
 	      (incf i)
 	      (+ x i))
 	  lst)))
+
+; 8
+(defun showdots (lst)
+  (if (null lst)
+      nil
+      (cons 
