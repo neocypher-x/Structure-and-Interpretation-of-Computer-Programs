@@ -66,4 +66,13 @@
 (defun showdots (lst)
   (if (null lst)
       nil
-      (cons 
+      ;(format t "(~A . ~A)" (car lst) (showdots (cdr lst)))))
+      (progn
+	(format t "(~A . " (car lst))
+	(showdots (cdr lst)))))
+
+
+(print cons '1 nil))
+
+(defun identity_ (x)
+  x)
