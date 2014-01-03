@@ -122,3 +122,27 @@
 (define zero (lambda (f) (lambda (x) x)))
 (define (add-1 n)
   (lambda (f) (lambda (x) (f ((n f) x)))))
+(define one
+  (lambda (f) (lambda (x) (f x))))
+(define two
+  (lambda (f) (lambda (x) (f (f x)))))
+
+; 2.7
+(define (make-interval a b) (cons a b))
+(define (upper-bound x) (cdr x))
+(define (lower-bound x) (car x))
+
+; 2.8
+(define (sub-interval x y)
+  (make-interval (- (lower-bound x) (upper-bound y))
+		 (- (upper-bound x) (lower-bound y))))
+
+; 2.9
+(define (width-interval x)
+  (abs (/ (- (lower-bound x) (upper-bound x)) 2)))
+
+; 2.10
+(define (div-interval x y)
+  (mul-interval x
+		(make-interval (/ 1.0 (upper-bound y))
+			       (/ 1.0 (lower-bound y)))))

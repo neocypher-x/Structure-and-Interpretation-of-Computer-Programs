@@ -69,10 +69,9 @@
       ;(format t "(~A . ~A)" (car lst) (showdots (cdr lst)))))
       (progn
 	(format t "(~A . " (car lst))
-	(showdots (cdr lst)))))
+	(showdots (cdr lst))
+	(if (null (cdr lst))
+	    (format t "NIL"))
+	(format t ")"))))
 
-
-(print cons '1 nil))
-
-(defun identity_ (x)
-  x)
+; 9
