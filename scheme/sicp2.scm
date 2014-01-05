@@ -140,9 +140,116 @@
 ; 2.9
 (define (width-interval x)
   (abs (/ (- (lower-bound x) (upper-bound x)) 2)))
+(define (add-interval x y)
+  (make-interval (+ (lower-bound x) (lower-bound y))
+		 (+ (upper-bound x) (upper-bound y))))
+
+; Our starting point:
+(define (width-sum x y)
+  (width-interval (add-interval x y)))
+; Substituing the two above function bodies gives:
+(define (width-sum x y)
+  (abs (/ (-
+	     (+ (lower-bound x) (lower-bound y))
+	     (+ (upper-bound x) (upper-bound y)))
+	  2)))
+; which gives:
+(define (width-sum x y)
+  (+ (abs (/ (- (lower-bound x) (upper-bound x))))
+     (abs (/ (- (lower-bound y) (upper-bound y))))))
+; which is equivalent to:
+(define (width-sum x y)
+  (+ (width-interval x)
+     (width-interval y)))
+; A similar argument holds for subtraction.
+; Counter-example for multiplication: 
+; Multiplying [0,1] with [0,1] produces [0,1],
+; but multiplying 0.5 with 0.5 produces 0.25 \= 0.5
+; Counter-example for division:
+; dividing [0,1] by [1,2] gives [0,1],
+; but dividing 0.5 with 0.5 gives 1 \= 0.5
 
 ; 2.10
+(define (contain0? y)
+  (and (<= (lower-bound y) 0)
+       (>= (upper-bound y) 0)))
+
+(define (mul-interval x y)
+  (let ((p1 (* (lower-bound x) (lower-bound y)))
+	(p2 (* (lower-bound x) (upper-bound y)))
+	(p3 (* (upper-bound x) (lower-bound y)))
+	(p4 (* (upper-bound x) (upper-bound y))))
+    (make-interval (min p1 p2 p3 p4)
+		   (max p1 p2 p3 p4))))
+
 (define (div-interval x y)
-  (mul-interval x
+  (if (contain0? y)
+      (error "The second interval may not contain 0")
+      (mul-interval x
 		(make-interval (/ 1.0 (upper-bound y))
-			       (/ 1.0 (lower-bound y)))))
+			       (/ 1.0 (lower-bound y))))))
+
+; 2.11
+; a  b  c  d
+; +  +  +  + (a*c) (b*d)
+; +  +  +  - does not exist (DNE)
+; +  +  -  + (b*c) (b*d)
+; +  +  -  - (b*c) (a*d)
+; +  -  +  + DNE
+; +  -  +  - DNE
+; +  -  -  + DNE
+; +  -  -  - DNE
+; -  +  +  + (a*d) (b*d)
+; -  +  +  - DNE
+; -  +  -  + 4 multiplications, use min and max
+; -  +  -  - (b*c) (a*c)
+; -  -  +  + (a*d) (b*c)
+; -  -  +  - DNE
+; -  -  -  + (a*d) (a*c)
+; -  -  -  - (a*c) (b*d) ===duplicate
+
+(define (mul-interval x y)
+  (define (pos? x)
+    (>= x 0))
+  (define (neg? x)
+    (<= x 0))
+  (let ((a (lower-bound x))
+	(b (upper-bound x))
+	(c (lower-bound y))
+	(d (upper-bound y)))
+    (cond ((or (and (>= a 0) (>= b 0) (>= c 0) (>= d 0))
+	       (and (<= a 0) (<= b 0) (<= c 0) (<= d 0)))
+	   (make-interval (* a c) (* b d)))
+	  ((and (pos? a) (pos? b) (neg? c) (pos? d))
+	   (make-interval (* b c) (* b d)))
+	  ((and (pos? a) (pos? b) (neg? c) (neg? d))
+	   (make-interval (* b c) (* a d)))
+	  ((and (neg? a) (pos? b) (pos? c) (pos? d))
+	   (make-interval (* a d) (* b d)))
+	  ((and (neg? a) (pos? b) (neg? c) (neg? d))
+	   (make-interval (* b c) (* a c)))
+	  ((and (neg? a) (neg? b) (pos? c) (pos? d))
+	   (make-interval (* a d) (* b c)))
+	  ((and (neg? a) (neg? b) (neg? c) (pos? d))
+	   (make-interval (* a d) (* a c)))
+	  ((and (neg? a) (pos? b) (neg? c) (pos? d))
+	   (let ((p1 (* a c))
+		 (p2 (* a d))
+		 (p3 (* b c))
+		 (p4 (* b d)))
+	     (make-interval (min p1 p2 p3 p4)
+			    (max p1 p2 p3 p4)))))))
+
+; 2.12
+(define (make-center-percent c t)
+  (let* ((proportion (/ t 100.0))
+	 (totalerror (abs (* c proportion))))
+    (make-interval (- c totalerror) (+ c totalerror))))
+(define (center i)
+  (/ (+ (lower-bound i) (upper-bound i)) 2))
+(define (percent x)
+  (let ((c (center x)))
+    (* 100.0
+       (/ (abs (- (upper-bound x) c)) c))))
+
+; 2.13
