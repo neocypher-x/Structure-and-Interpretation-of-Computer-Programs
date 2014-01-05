@@ -62,6 +62,60 @@
 	      (+ x i))
 	  lst)))
 
+; 6
+; The idea here is to provide some common functions
+; that'll accept arguments as their original counter-
+; parts and in the same order, but provide output
+; such that car and cdr as originally implemented in
+; lisp will seem to have their definitions reversed.
+(defun cons_ (a b)
+  (cons b a))
+; The idea here is to reverse the way we form
+; lists using cons, eg (cons (cons (cons () c) b) a)
+; This can be achieved by using cons_ and passing
+; arguments in the order one would pass if one
+; were to create a regular list using cons
+; I'll be using variadic functions here
+(defun list_ (&rest args)
+  (let ((lst nil))
+    (dolist (x (reverse args))
+      (setf lst (cons_ x lst)))
+    lst))
+(defun length_ (lst)
+  (if (null lst)
+      0
+      (+ (length_ (car lst)) 1)))
+(defun our-member (obj lst)
+  (if (null lst)
+      nil
+      (if (eql (car lst) obj)
+	  lst
+	  (our-member obj (cdr lst)))))
+(defun member_ (obj lst)
+  (if (null lst)
+      nil
+      (if (eql (cdr lst) obj)
+	  lst
+	  (member_ obj (car lst)))))
+
+; 7
+(defun compress (x)
+  (if (consp x)
+      (compr (car x) 1 (cdr x))
+      x))
+(defun compr (elt n lst)
+  (if (null lst)
+      (list (n-elts elt n))
+      (let ((next (car lst)))
+	(if (eql next elt)
+	    (compr elt (+ n 1) (cdr lst))
+	    (cons (n-elts elt n)
+		  (compr next 1 (cdr lst)))))))
+(defun n-elts (elt n)
+  (if (> n 1)
+      (list n elt)
+      elt))
+
 ; 8
 (defun showdots (lst)
   (if (null lst)
