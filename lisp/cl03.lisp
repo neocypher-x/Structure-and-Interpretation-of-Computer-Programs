@@ -113,8 +113,10 @@
 		  (compr next 1 (cdr lst)))))))
 (defun n-elts (elt n)
   (if (> n 1)
-      (list n elt)
+      (cons n elt)
       elt))
+(setf com (compress '(1 1 1 0 1 0 0 0 0 1)))
+(showdots com)
 
 ; 8
 (defun showdots (lst)
@@ -123,6 +125,23 @@
       ;(format t "(~A . ~A)" (car lst) (showdots (cdr lst)))))
       (progn
 	(format t "(~A . " (car lst))
+	(showdots (cdr lst))
+	(if (null (cdr lst))
+	    (format t "NIL"))
+	(format t ")"))))
+
+; correct version accounts for possibility of
+; any of the list elements being a list and so on
+(defun showdots (lst)
+  (if (not (consp lst))
+      lst
+      ;(format t "(~A . ~A)" (car lst) (showdots (cdr lst)))))
+      (progn
+	(format t "(")
+	(if (consp (car lst))
+	    (progn (showdots (car lst))
+		   (format t " . "))
+	    (format t "~A . " (car lst)))
 	(showdots (cdr lst))
 	(if (null (cdr lst))
 	    (format t "NIL"))
