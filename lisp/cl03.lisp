@@ -11,7 +11,6 @@
 		    (setf lst (append lst (list x)))))
 	    lst2)
     lst))
-
 (new-union '(a b c) '(1 2 3))
 
 ; 3
@@ -131,11 +130,11 @@
 	(format t ")"))))
 
 ; correct version accounts for possibility of
-; any of the list elements being a list and so on
+; any of the list elements being a list or 
+; even a dotted list
 (defun showdots (lst)
   (if (not (consp lst))
-      lst
-      ;(format t "(~A . ~A)" (car lst) (showdots (cdr lst)))))
+      (format t "~A" lst)
       (progn
 	(format t "(")
 	(if (consp (car lst))
@@ -143,8 +142,6 @@
 		   (format t " . "))
 	    (format t "~A . " (car lst)))
 	(showdots (cdr lst))
-	(if (null (cdr lst))
-	    (format t "NIL"))
 	(format t ")"))))
 
 ; 9
