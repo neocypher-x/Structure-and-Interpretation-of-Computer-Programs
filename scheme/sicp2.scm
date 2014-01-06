@@ -241,6 +241,7 @@
 			    (max p1 p2 p3 p4)))))))
 
 ; 2.12
+; One way to do it using make-interval
 (define (make-center-percent c t)
   (let* ((proportion (/ t 100.0))
 	 (totalerror (abs (* c proportion))))
@@ -252,4 +253,51 @@
     (* 100.0
        (/ (abs (- (upper-bound x) c)) c))))
 
+(define (make-center-width c w)
+  (make-interval (- c w) (+ c w)))
+(define (center i)
+  (/ (+ (lower-bound i) (upper-bound i)) 2))
+(define (width i)
+  (/ (- (upper-bound i) (lower-bound i)) 2))
+
+; Another way to do it using make-center-width
+(define (make-center-percent c t)
+  (make-center-width c (* c (/ t 100))))
+(define (percent x)
+  (* 100.0
+     (/ (width c) (center x))))
+
 ; 2.13
+; Approximation for the tolerance of product
+; of two intervals
+(define (tol-product x y)
+  (+ (percent x) (percent y)))
+
+; 2.14
+(define (par1 r1 r2)
+  (div-interval (mul-interval r1 r2)
+		(add-interval r1 r2)))
+(define (par2 r1 r2)
+  (let ((one (make-interval 1 1)))
+    (div-interval one
+		  (add-interval (div-interval one r1)
+				(div-interval one r2)))))
+(define r1 (make-center-percent 100 5))
+(define r2 (make-center-percent 200 2))
+(par1 r1 r2)
+(par2 r1 r2)
+
+; 2.15
+(div-interval r1 r1)
+; In interval arithmetic, the concept of 
+; identity is not clear, ie dividing an
+; interval by itself does not produce 1,
+; only approximates it. This means that
+; anytime an interval is reintroduced
+; (usually by multiplication of the term
+; (x/x), additional error is introduced
+; to the equation. Hence, Eva is right.
+
+; 2.16
+; This issue is explained as the dependency
+; problem in wikipedia.
