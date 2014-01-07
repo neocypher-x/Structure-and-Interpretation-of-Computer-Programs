@@ -301,3 +301,15 @@
 ; 2.16
 ; This issue is explained as the dependency
 ; problem in wikipedia.
+
+; 2.17
+(define (last-pair lst)
+  (if (null? (cdr lst))
+      (car lst)
+      (last-pair (cdr lst))))
+
+; 2.18
+(define (reverse_ lst)
+  (if (null? lst)
+      ()
+      (append (reverse_ (cdr lst)) (list (car lst)))))
