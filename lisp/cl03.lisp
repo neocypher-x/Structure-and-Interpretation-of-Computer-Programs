@@ -145,6 +145,7 @@
 	(format t ")"))))
 
 ; 9
+<<<<<<< HEAD
 ; This function finds the longest
 ; path from start to end nodes in a directed graph, with
 ; no cycles. If there are multiple solutions, it only
@@ -156,12 +157,22 @@
 ; allow for multiple longest paths
 (defun bfs (end queue net)
   (if (null queue) ;if candidates are empty
+=======
+(defun shortest-path (start end net)
+  (bfs end (list (list start)) net))
+(defun bfs (end queue net)
+  (if (null queue)
+>>>>>>> 14b323bc97701e6f4686e838ad5132bbc2f5412d
       nil
       (let ((path (car queue)))
 	(let ((node (car path)))
 	  (if (eql node end)
 	      (reverse path)
+<<<<<<< HEAD
 	      (dfs end
+=======
+	      (bfs end
+>>>>>>> 14b323bc97701e6f4686e838ad5132bbc2f5412d
 		   (append (cdr queue)
 			   (new-paths path node net))
 		   net))))))
@@ -170,6 +181,7 @@
 	      (cons n path))
 	  (cdr (assoc node net))))
 (setf min '((a b c) (b c) (c d)))
+<<<<<<< HEAD
 
 ; let soln candidates be nil, curr greatest len = -1
 ; if candidate paths are not empty, then:
@@ -205,3 +217,7 @@
 	      (if (not (member n path))
 		  (cons n path)))
 	  (cdr (assoc node net))))
+=======
+(cdr (assoc 'a min))
+(shortest-path 'a 'd min)
+>>>>>>> 14b323bc97701e6f4686e838ad5132bbc2f5412d
