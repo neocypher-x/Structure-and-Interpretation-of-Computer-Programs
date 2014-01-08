@@ -145,3 +145,63 @@
 	(format t ")"))))
 
 ; 9
+; This function finds the longest
+; path from start to end nodes in a directed graph, with
+; no cycles. If there are multiple solutions, it only
+; returns one of them.
+(defun longest-path (start end net)
+  (dfs end (list (list start)) net))
+; keep track of longest path length
+; a variable for lognest candidate path seen so far
+; allow for multiple longest paths
+(defun bfs (end queue net)
+  (if (null queue) ;if candidates are empty
+      nil
+      (let ((path (car queue)))
+	(let ((node (car path)))
+	  (if (eql node end)
+	      (reverse path)
+	      (dfs end
+		   (append (cdr queue)
+			   (new-paths path node net))
+		   net))))))
+(defun new-paths (path node net)
+  (mapcar #'(lambda (n)
+	      (cons n path))
+	  (cdr (assoc node net))))
+(setf min '((a b c) (b c) (c d)))
+
+; let soln candidates be nil, curr greatest len = -1
+; if candidate paths are not empty, then:
+; 1) pop the last candidate path, path
+; 2) pop the last element from path, x
+; 3) if x equals end node then check 
+;        if path length is greater than curr greatest 
+;        length. if it is, then flush the current soln
+;        candidates and add path to it. If not, then
+;        discard.
+;    If x does not equal end node, then create new
+;    candidate paths by appending unvisited neighbor
+;    nodes and push to the end of candidate paths.
+; for now, solns just contains 1 path
+(defun dfs (end queue net)
+  (let ((solns nil)
+	(greatestlen -1))
+    (if (null queue)
+	nil
+        (let ((path (pop queue)))
+	  (let ((x (car path)))
+	    (if (eql x end)
+		(if (> (length path) greatestlen)
+		    (progn
+		      (setf greatestlen (length path))
+		      (setf solns (reverse path))))
+	        (dfs end
+		     (append (new-paths path x net)
+			     queue)
+		     net)))))))
+(defun new-paths (path node net)
+  (mapcar #'(lambda (n)
+	      (if (not (member n path))
+		  (cons n path)))
+	  (cdr (assoc node net))))
