@@ -327,3 +327,29 @@
 	    (cc (- amount
 		   (first-denomination coin-values))
 		coin-values)))))
+(define (first-denomination coin-values)
+  (car coin-values))
+(define (except-first-denomination coin-values)
+  (cdr coin-values))
+(define (no-more? coin-values)
+  (null? coin-values))
+(cc 100 us-coins)
+(define us-coins (list 5 10 50 25 1))
+(define us-coins (list 1 5 10 25 50))
+
+; The order of coin-values does not affect the value
+; produced by cc.
+
+; 2.20
+(define (same-parity . x)
+  (define (get-parity lst)
+    (if (= (remainder (car lst) 2) 0)
+	0
+	1))
+  (define (test-parity lst result parity)
+    (if (null? lst)
+	result
+	(if (= (remainder (car lst) 2) parity)
+	    (test-parity (cdr lst) (append result (list (car lst))) parity)
+	    (test-parity (cdr lst) result parity))))
+  (test-parity x () (get-parity x)))
