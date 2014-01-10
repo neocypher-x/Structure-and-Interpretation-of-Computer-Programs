@@ -202,3 +202,8 @@
 (maphash #'(lambda (k v)
 	     (format t "~A = ~A~%" k v))
 	 ht)
+
+; Exercises
+; 1
+(defun quarter-turn (arr)
+  

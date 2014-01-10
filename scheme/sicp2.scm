@@ -353,3 +353,46 @@
 	    (test-parity (cdr lst) (append result (list (car lst))) parity)
 	    (test-parity (cdr lst) result parity))))
   (test-parity x () (get-parity x)))
+
+(define (scale-list items factor)
+  (if (null? items)
+      ()
+      (cons (* (car items) factor)
+	    (scale-list (cdr items) factor))))
+(scale-list (list 1 2 3 4 5) 10)
+
+; 2.21
+(define (square-list items)
+  (if (null? items)
+      ()
+      (cons (square (car items)) (square-list (cdr items)))))
+(define (square-list items)
+  (map square items))
+
+; 2.22
+; The output will be in reverse order, because the cons in
+; the iteration has each consecutive item cons'd leftwards
+; of result, instead of rightwards.
+
+(define (square-list items)
+  (define (iter things answer)
+    (if (null? things)
+	answer
+	(iter (cdr things)
+	      (cons answer
+		    (square (car things))))))
+  (iter items ()))
+
+; The result produced from naively switching the order of the
+; cons produces an improper list, where in the base case, ()
+; gets cons'd to the front of the list, instead of at the end
+
+; 2.23
+(for-each_ (lambda (x) (newline) (display x))
+	 (list 57 321 88))
+(define (for-each_ f lst)
+  (if (null? lst)
+      ()
+      (begin
+	(f (car lst))
+	(for-each_ f (cdr lst)))))
