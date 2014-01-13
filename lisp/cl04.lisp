@@ -205,5 +205,7 @@
 
 ; Exercises
 ; 1
+; Can use two nested dotimes loops to print array contents
+; 
 (defun quarter-turn (arr)
   

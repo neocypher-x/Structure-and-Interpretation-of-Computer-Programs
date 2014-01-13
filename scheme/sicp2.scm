@@ -396,3 +396,90 @@
       (begin
 	(f (car lst))
 	(for-each_ f (cdr lst)))))
+
+; 2.25
+(car (cdr (car (cdr (cdr '(1 3 (5 7) 9))))))
+(car (car '((7))))
+(car (cdr (car (cdr (car (cdr (car (cdr (car (cdr (car (cdr '(1 (2 (3 (4 (5 (6 7))))))))))))))))))
+
+; 2.26
+(define x (list 1 2 3))
+(define y (list 4 5 6))
+
+(append x y) ; produces (1 2 3 4 5 6)
+(cons x y)   ; produces ((1 2 3) 4 5 6)
+(list x y)   ; produces ((1 2 3) (4 5 6))
+
+; 2.27
+(define x (list (list 1 2) (list 3 4)))
+(reverse x)
+(define (deep-reverse lst)
+  (if (null? lst)
+      ()
+      (if (pair? lst) ; pair? considers dotted lists and proper lists, whereas list? only considers proper lists
+	  (if (list? (car lst))
+	      (append (deep-reverse (cdr lst)) (list (deep-reverse (car lst))))
+	      (append (deep-reverse (cdr lst)) (list (car lst))))
+	  ())))
+
+(deep-reverse x)
+
+; 2.28
+(define (count-leaves x)
+  (cond ((null? x) 0)
+	((not (pair? x)) 1)
+	(else (+ (count-leaves (car x))
+		 (count-leaves (cdr x))))))
+
+(define (fringe x)
+  (define (iter x result)
+    (cond ((null? x) result)
+	  ((not (pair? x)) (cons x result))
+	  (else (begin (append result (iter (car x) result))
+		       (append result (iter (cdr x) result))))))
+  (iter x ()))
+(define (fringe x result)
+  (cond ((null? x) ())
+	((not (pair? x)) (begin
+			   (display x)
+			   (display " ")
+			   (list x)))
+	(else (append
+	       (fringe (car x) result)
+	       (fringe (cdr x) result)))))
+
+
+(define x (list (list 1 2) (list 3 4)))
+(fringe x)
+(fringe x ())
+(define y (list (list 1 2) 3 4 5 (list 6) 7))
+(fringe y ())
+
+; 2.29
+(define (make-mobile left right)
+  (list left right))
+(define (make-branch length structure)
+  (list length structure))
+; a
+(define (left-branch mobile)
+  (car mobile))
+(define (right-branch mobile)
+  (car (cdr mobile)))
+(define (branch-length branch)
+  (car branch))
+(define (branch-structure branch)
+  (car (cdr branch)))
+; b
+(define (total-weight mobile)
+  (cond ((and (not (list? (branch-structure (left-branch mobile))))
+	      (not (list? (branch-structure (right-branch mobile)))))
+  (+ (branch-structure (left-branch mobile))
+     (branch-structure (right-branch mobile))))))
+; c
+(define (balanced? mobile)
+  (cond ((and (not (list? (branch-structure (left-branch mobile))))
+	      (not (list? (branch-structure (right-branch mobile)))))
+	 (= (* (branch-structure (left-branch mobile))
+	       (branch-length (left-branch mobile)))
+	    (* (branch-structure (right-branch mobile))
+	       (branch-length (right-branch mobile)))))))
