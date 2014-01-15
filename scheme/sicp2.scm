@@ -470,16 +470,103 @@
 (define (branch-structure branch)
   (car (cdr branch)))
 ; b
+; accepts a mobile, which consists of just 2 branches
+; a branch consists of a length, and either a number
+; or another binary  mobile
 (define (total-weight mobile)
-  (cond ((and (not (list? (branch-structure (left-branch mobile))))
-	      (not (list? (branch-structure (right-branch mobile)))))
-  (+ (branch-structure (left-branch mobile))
-     (branch-structure (right-branch mobile))))))
+  (define (mobile? branch)
+    (list? (branch-structure branch)))
+  (let ((lb (left-branch mobile))
+	(rb (right-branch mobile)))
+    (cond ((and (not (mobile? lb))
+		(not (mobile? rb)))
+	   (+ (branch-structure lb)
+	      (branch-structure rb)))
+	  ((and (not (mobile? lb))
+		(mobile? rb))
+	   (+ (branch-structure lb)
+	      (total-weight rb)))
+	  ((and (mobile? lb)
+		(not (mobile? rb)))
+	   (+ (total-weight lb)
+	      (branch-structure rb))
+	   (else
+	    (+ (total-weight lb)
+	       (total-weight rb)))))))
 ; c
 (define (balanced? mobile)
-  (cond ((and (not (list? (branch-structure (left-branch mobile))))
-	      (not (list? (branch-structure (right-branch mobile)))))
-	 (= (* (branch-structure (left-branch mobile))
-	       (branch-length (left-branch mobile)))
-	    (* (branch-structure (right-branch mobile))
-	       (branch-length (right-branch mobile)))))))
+  (define (mobile? branch)
+    (list? (branch-structure branch)))
+  (define (torque branch)
+    (* (branch-length branch) (branch-structure branch)))
+  (let ((lb (left-branch mobile))
+	(rb (right-branch mobile)))
+    (cond ((and (not (mobile? lb)) ; both branches contain weights
+		(not (mobile? rb)))
+	   (= (* (branch-length lb)
+		 (branch-structure lb))
+	      (* (branch-length rb)
+		 (branch-structure rb))))
+	  ((and (not (mobile? lb))
+		(mobile? rb))
+	   (and
+	    (= (torque lb)
+	       (* (branch-length rb)
+		  (total-weight (branch-structure rb))))
+	    (balanced? (branch-structure rb))))
+	  ((and (mobile? lb)
+		(not (mobile? rb)))
+	   (and
+	    (balanced? (branch-structure lb))
+	    (= (torque rb)
+	       (* (branch-length lb)
+		  (total-weight (branch-structure lb))))))
+	  (else ; both branches are contain mobiles
+	   (and (balanced? (branch-structure lb))
+		(balanced? (branch-structure rb))
+		(= (* (branch-length lb)
+		      (total-weight (branch-structure lb)))
+		   (* (branch-length rb)
+		      (total-weight (branch-structure rb)))))))))
+
+(define z (make-mobile (make-branch 2 3) (make-branch 3 2)))
+(balanced? z)
+(define v (make-mobile (make-branch 2 (make-mobile (make-branch 3 4) (make-branch 4 3))) (make-branch 7 3)))
+(balanced? v)
+
+; d
+(define (make-mobile left right)
+  (cons left right))
+(define (make-branch length structure)
+  (cons length structure))
+(define zz (make-mobile (make-branch 2 3) (make-branch 3 2)))
+(balanced? zz)
+; list? will have to be replaced with pair?
+; one could also write a conversion interface that converts
+; the new interface to the old interface.
+
+; 2.30
+(define (square-tree t)
+  (cond ((null? t) ())
+	((not (pair? t)) (square t))
+	(else (cons (square-tree (car t))
+		    (square-tree (cdr t))))))
+(square-tree
+ (list 1
+       (list 2 (list 3 4) 5)
+       (list 6 7)))
+
+(define (square-tree t)
+  (map (lambda (st)
+	 (if (pair? st)
+	     (square-tree st)
+	     (square st)))
+       t))
+
+; 2.31
+(define (square-tree t)
+  (map (lambda (st)
+	 (if (pair? st)
+	     (square-tree st)
+	     (square st)))
+       t))
