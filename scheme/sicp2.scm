@@ -564,9 +564,20 @@
        t))
 
 ; 2.31
-(define (square-tree t)
-  (map (lambda (st)
-	 (if (pair? st)
-	     (square-tree st)
-	     (square st)))
+; f is the function, t is tree
+(define (tree-map f t)
+  (map (lambda (x)
+	 (if (pair? x)
+	     (tree-map f x)
+	     (f x)))
        t))
+(define (square-tree tree) (tree-map square tree))
+
+; 2.32
+(define (subsets s)
+  (if (null? s)
+      (list ())
+      (let ((rest (subsets (cdr s))))
+	(append rest (map list rest)))))
+
+(subsets '(1 2 3))
