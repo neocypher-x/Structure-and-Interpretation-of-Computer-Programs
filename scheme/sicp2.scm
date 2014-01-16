@@ -515,7 +515,7 @@
 	  ((and (mobile? lb) (not (mobile? rb)))
 	   (and (balanced? (branch-structure lb))
 		(= (torque rb) (torque-mob lb))))
-	  (else ; both branches are contain mobiles
+	  (else ; both branches contain mobiles
 	   (and (balanced? (branch-structure lb))
 		(balanced? (branch-structure rb))
 		(= (torque-mob lb) (torque-mob rb)))))))
