@@ -511,14 +511,14 @@
 		 (branch-structure rb))))
 	  ((and (not (mobile? lb)) (mobile? rb))
 	   (and (= (torque lb) (torque-mob rb))
-		(balanced? (branch-structure rb)))
+		(balanced? (branch-structure rb))))
 	  ((and (mobile? lb) (not (mobile? rb)))
-	   (and	(balanced? (branch-structure lb))
-		(= (torque rb) (torque-mob lb)))
+	   (and (balanced? (branch-structure lb))
+		(= (torque rb) (torque-mob lb))))
 	  (else ; both branches are contain mobiles
 	   (and (balanced? (branch-structure lb))
 		(balanced? (branch-structure rb))
-		(= (torque-mob lb) (torque-mob rb)))))))))
+		(= (torque-mob lb) (torque-mob rb)))))))
 
 (define z (make-mobile (make-branch 2 3) (make-branch 3 2)))
 (balanced? z)
