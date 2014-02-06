@@ -569,7 +569,10 @@
   (if (null? s)
       (list ())
       (let ((rest (subsets (cdr s))))
-	(append rest (map list rest)))))
+	(append rest (map
+		      (lambda (x)
+			(append (list (car s)) x))
+		      rest)))))
 
 (subsets '(1 2 3))
 
