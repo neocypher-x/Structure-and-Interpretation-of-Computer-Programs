@@ -619,3 +619,18 @@
       (cons (accumulate op init (map (lambda (x) (car x)) seqs))
 	    (accumulate-n op init (map (lambda (x) (cdr x)) seqs)))))
 (accumulate-n + 0 '((1 2 3) (4 5 6) (7 8 9) (10 11 12)))
+
+; 2.37
+(define (dot-product v w)
+  (accumulate + 0 (map * v w)))
+
+; assumes the appropriate dimensions for m and v
+(define (matrix-*-vector m v)
+  (map (lambda (row) (dot-product row v)) m))
+(matrix-*-vector '((1 2) (3 4)) '(5 6))
+(define (transpose mat)
+  (accumulate-n cons () mat))
+(transpose '((1 2 3) (4 5 6) (7 8 9)))
+(define (matrix-*-matrix m n)
+  (let ((cols (transpose n)))
+    (map (lambda (row) (dot-product row __ m)))
