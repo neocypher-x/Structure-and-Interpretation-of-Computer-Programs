@@ -656,3 +656,10 @@
 (fold-right list () (list 1 2 3))
 (fold-left list () (list 1 2 3))
 ; op must commute for fold-left and fold-right to match on a sequence
+
+; 2.39
+(define (reverse sequence)
+  (fold-right (lambda (x y) (append y (list x))) () sequence))
+(define (reverse sequence)
+  (fold-left (lambda (x y) (cons y x)) () sequence))
+(reverse '(1 2 3))
