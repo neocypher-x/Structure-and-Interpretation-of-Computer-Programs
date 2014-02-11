@@ -639,3 +639,20 @@
 		cols))		  
 	 m)))
 (matrix-*-matrix '((1 2 3) (4 5 6) (7 8 9)) '((1 0 0) (0 1 0) (0 0 1)))
+
+; 2.38
+(define (fold-left op initial sequence)
+  (define (iter result rest)
+    (if (null? rest)
+	result
+	(iter (op result (car rest))
+	      (cdr rest))))
+  (iter initial sequence))
+(define (fold-right op initial sequence)
+  (accumulate op initial sequence))
+
+(fold-right / 1 (list 1 2 3))
+(fold-left / 1 (list 1 2 3))
+(fold-right list () (list 1 2 3))
+(fold-left list () (list 1 2 3))
+; op must commute for fold-left and fold-right to match on a sequence
