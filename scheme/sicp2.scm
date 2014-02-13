@@ -664,7 +664,7 @@
   (fold-left (lambda (x y) (cons y x)) () sequence))
 (reverse '(1 2 3))
 
-; 2.40
+; Nested Mappings
 (define (smallest-divisor n)
   (find-divisor n 2))
 (define (find-divisor n test-divisor)
@@ -673,26 +673,20 @@
 	(else (find-divisor n (+ test-divisor 1)))))
 (define (divides? a b)
   (= (remainder b a) 0))
-
 (define (prime? n)
   (= n (smallest-divisor n)))
 
-(define (flatmap proc seq))
+(define (flatmap proc seq)
+  (accumulate append () (map proc seq)))
 (define (enumerate-interval i j)
   (if (> i j)
       ()
       (cons i (enumerate-interval (+ i 1) j))))
 
-(define (unique-pairs n)
-  (map (lambda (x)
-	 (map (lambda (y) (list x y))
-	      (enumerate-interval 1 (- x 1))))
-       (enumerate-interval 1 n)))
 (define (prime-sum? pair)
   (prime? (+ (car pair) (cadr pair))))
 (define (make-pair-sum pair)
   (list (car pair) (cadr pair) (+ (car pair) (cadr pair))))
-
 (define (prime-sum-pairs n)
   (map make-pair-sum
        (filter prime-sum?
@@ -701,3 +695,22 @@
 		  (map (lambda (j) (list i j))
 		       (enumerate-interval 1 (- i 1))))
 		(enumerate-interval 1 n)))))
+
+; 2.40
+(define (unique-pairs n)
+  (flatmap (lambda (i)
+	     (map (lambda (j) (list i j))
+		  (enumerate-interval 1 (- i 1))))
+	   (enumerate-interval 1 n)))
+(define (prime-sum-pairs n)
+  (map make-pair-sum
+       (filter prime-sum?
+	       (unique-pairs n))))
+
+; 2.41
+(define (unique-triples n)
+  (flatmap (lambda (x)
+	     (map (lambda (pair)
+		    (append (list x) pair))
+		  (unique-pairs (- x 1))))
+	   (enumerate-interval 1 n)))
