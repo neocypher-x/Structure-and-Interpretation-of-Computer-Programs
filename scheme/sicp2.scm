@@ -730,6 +730,10 @@ b; 2.1
 	  (queen-cols (- k 1))))))
   (queen-cols board-size))
 
+; The choice of representation for a possible solution
+; will be a list of integers, where the integers represent
+; the row positions. For example, the integer in the 3rd
+; list element represents the row position of the k-2 column.
 (define (adjoin-position new-row k rest-of-queens)
   ;(append rest-of-queens (list new-row)))
   (append (list new-row) rest-of-queens))
@@ -766,3 +770,18 @@ b; 2.1
 (define (safe? k positions)
   #t)
 (queens 4)
+
+; 2.43
+; The queen-cols call is expensive, since it generates
+; all the solutions for the kth column. The original
+; solution for queens generates a linear recursive
+; process, since queen-cols will call itself once for
+; each column. However, switching the order of queen-cols
+; with enumerate interval causes queen-cols to be called
+; for each element in enumerate-interval. Each call to
+; queen cols will in turn generate an additional call to
+; queen cols for each element in
+; (enumerate-interval 1 board-size) further in the
+; recursive call stack. Hence, a linear recursive call
+; becomes a tree recursive call. So the new running
+; time will be proportal to T^board-size.
