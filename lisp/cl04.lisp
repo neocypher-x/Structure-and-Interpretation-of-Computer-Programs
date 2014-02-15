@@ -208,4 +208,15 @@
 ; Can use two nested dotimes loops to print array contents
 ; 
 (defun quarter-turn (arr)
-  
+  (let ((d2 (array-dimensions arr)))
+    (let ((ret (make-array d2))
+	  (d1 (car d2)))
+	  (dotimes (i d1 0)
+	    (dotimes (j d1 0)
+	      (format t "~A" (aref arr i j))
+	      (setf (aref ret j (- (- d1 1) i)) (aref arr i j)))
+	    (format t "~%"))
+	  ret)))
+	  
+(setf arr (make-array '(3 3) :initial-contents '((1 2 3) (4 5 6) (7 8 9))))
+(setf arr (make-array '(4 4) :initial-contents '((1 2 3 4) (5 6 7 8) (9 10 11 12) (13 14 15 16))))
