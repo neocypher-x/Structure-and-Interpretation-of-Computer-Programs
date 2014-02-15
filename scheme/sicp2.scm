@@ -1,4 +1,4 @@
-; 2.1
+b; 2.1
 (define (make-rat n d)
   (let ((g (gcd n d)))
     (cond ((and (< n 0) (< d 0)) (cons (/ (- n) g)
@@ -731,8 +731,38 @@
   (queen-cols board-size))
 
 (define (adjoin-position new-row k rest-of-queens)
-  (append rest-of-queens (list new-row)))
+  ;(append rest-of-queens (list new-row)))
+  (append (list new-row) rest-of-queens))
 (define empty-board ())
+
+; check horizontal only
+(define (safe? k positions)
+  (let ((kth-col (car positions)))
+    (define (safe?-helper rem)
+      (if (null? rem)
+	  #t
+	  (and (not (= kth-col (car rem)))
+	       (safe?-helper (cdr rem)))))
+    (safe?-helper (cdr positions))))
+
+; horizontal + diagonal checking
+; for diagonal checking, the idea is to create a counter
+; that keeps track of current column distance away from
+; the kth column. For a column n, the distance is
+; (abs (- k n)). Add this distance to the position of
+; the queen in the kth column, and check for equality.
+; Equality implies there's a diagonal check.
+(define (safe? k positions)
+  (let ((kth-col (car positions)))
+    (define (safe?-helper i rem)
+      (if (null? rem)
+	  #t
+	  (and (not (= kth-col (car rem)))
+	       (not (= kth-col (+ (car rem) i)))
+	       (not (= kth-col (- (car rem) i)))
+	       (safe?-helper (+ i 1) (cdr rem)))))
+    (safe?-helper 1 (cdr positions))))
+
 (define (safe? k positions)
   #t)
 (queens 4)
