@@ -1,4 +1,4 @@
-b; 2.1
+; 2.1
 (define (make-rat n d)
   (let ((g (gcd n d)))
     (cond ((and (< n 0) (< d 0)) (cons (/ (- n) g)
@@ -815,7 +815,328 @@ b; 2.1
     (let ((half (beside (flip-horiz quarter) quarter)))
       (below (flip-vert half) half))))
 
+(define (square-of-four tl tr bl br)
+  (lambda (painter)
+    (let ((top (beside (tl painter) (tr painter)))
+	  (bottom (beside (bl painter) (br painter))))
+      (below bottom top))))
+
+(define (flipped-pairs painter)
+  (let ((combine4 (square-of-four identity flip-vert
+				  identity flip-vert)))
+    (combine4 painter)))
+
+(define (square-limit painter n)
+  (let ((combine4 (square-of-four flip-horiz identity
+				  rotate180 flip-vert)))
+    (combine4 (corner-split painter n))))
 ; 2.44
 ;
-(define (up-split)
-  ())
+(define (up-split painter n)
+  (if (= n 0)
+      painter
+      (let ((smaller (up-split painter (- n 1))))
+	(below painter (beside smaller smaller)))))
+
+; 2.45
+(define (split f g)
+  (define (split-helper painter n)
+    (if (= n 0)
+	painter
+	(let ((smaller (split-helper painter (- n 1))))
+	  (f painter (g smaller smaller)))))
+  (lambda (painter n)
+    (split-helper painter n)))
+
+(define right-split (split beside below))
+(define up-split (split below beside))
+
+; 2.46
+(define (make-vect x y)
+	   (cons x y))
+(define (xcor-vect v)
+  (car v))
+(define (ycor-vect v)
+  (cdr v))
+
+(define (add-vect u v)
+  (make-vect (+ (xcor-vect u) (xcor-vect v))
+	     (+ (ycor-vect u) (ycor-vect v))))
+(define (sub-vect u v)
+  (make-vect (- (xcor-vect u) (xcor-vect v))
+	     (- (ycor-vect u) (ycor-vect v))))
+(define (scale-vect s v)
+  (make-vect (* s (xcor-vect v))
+	     (* s (ycor-vect v))))
+
+; 2.47
+(define (make-frame origin edge1 edge2)
+  (list origin edge1 edge2))
+(define (origin-frame frame)
+  (car frame))
+(define (edge1-frame frame)
+  (car (cdr frame)))
+(define (edge2-frame frame)
+  (car (cdr (cdr frame))))
+
+(define (make-frame origin edge1 edge2)
+  (cons origin (cons edge1 edge2)))
+(define (origin-frame frame)
+  (car frame))
+(define (edge1-frame frame)
+  (car (cdr frame)))
+(define (edge2-frame frame)
+  (cdr (cdr frame)))
+
+(define (frame-coord-map frame)
+  (lambda (v)
+    (add-vect
+     (origin-frame frame)
+     (add-vect (scale-vect (xcor-vect v)
+			   (edge1-frame frame))
+	       (scale-vect (ycor-vect v)
+			   (edge2-frame frame))))))
+
+(define (segments->painter segment-list)
+  (lambda (frame)
+    (for-each
+     (lambda (segment)
+       (draw-line
+	((frame-coord-map frame) (start-segment segment))
+	((frame-coord-map frame) (end-segment segment))))
+     segment-list)))
+
+; 2.48
+(define (make-segment u v)
+  (cons u v))
+(define (start-segment v)
+  (car v))
+(define (end-segment v)
+  (cdr v))
+
+(define (segments->painter segment-list)
+  (lambda (frame)
+    (for-each
+     (lambda (segment)
+       (draw-line
+	((frame-coord-map frame) (start-segment segment))
+	((frame-coord-map frame) (end-segment))))
+     segment-list)))
+
+; 2.49
+; a
+(define (outline-frame frame)
+  (let ((a (make-vect 0 0))
+	(b (make-vect 0 1))
+	(c (make-vect 1 0))
+	(d (make-vect 1 1)))
+    (let ((segment-list (list (make-segment a c)
+			      (make-segment c d)
+			      (make-segment d b)
+			      (make-segment b a))))
+      (segments->painter segment-list))))
+; b
+(define (x-frame frame)
+  (let ((a (make-vect 0 0))
+	(b (make-vect 0 1))
+	(c (make-vect 1 0))
+	(d (make-vect 1 1)))
+    (let ((segment-list (list (make-segment a d)
+			      (make-segment c b))))
+      (segments->painter segment-list))))
+; c
+(define (diamond-frame frame)
+  (let ((a (make-vect 0.5 0))
+	(b (make-vect 1 0.5))
+	(c (make-vect 0.5 1))
+	(d (make-vect 0 0.5)))
+    (let ((segment-list (list (make-segment a b)
+			      (make-segment b c)
+			      (make-segment c d)
+			      (make-segment d a))))
+      (segments->painter segment-list))))
+; d
+; skip
+(define (beside painter1 painter2)
+  (let ((split-point (make-vect 0.5 0.0)))
+    (let ((paint-left
+	   (transform-painter painter1
+			      (make-vect 0.0 0.0)
+			      split-point
+			      (make-vect 0.0 1.0)))
+	  (paint-right
+	   (transform-painter painter2
+			      split-point
+			      (make-vect 1.0 0.0)
+			      (make-vect 0.5 1.0))))
+      (lambda (frame)
+	(paint-left frame)
+	(paint-right frame)))))
+
+; 2.50
+(define (flip-horiz  painter)
+  (transform-painter painter
+		     (make-vect 1.0 0.0)
+		     (make-vect 0.0 0.0)
+		     (make-vect 1.0 1.0)))
+(define (rotate180 painter)
+  (transform-painter painter
+		     (make-vect 1.0 1.0)
+		     (make-vect 0.0 1.0)
+		     (make-vect 1.0 0.0)))
+(define (rotate270 painter)
+  (transform-painter painter
+		     (make-vect 0.0 1.0)
+		     (make-vect 0.0 0.0)
+		     (make-vect 1.0 1.0)))
+; 2.51
+; first time in a style analogous to beside
+(define (below painter1 painter2)
+  (let ((split-point (make-vect 0.0 0.5)))
+    (let ((paint-bottom
+	   (transform-painter painter1
+			      (make-vect 0.0 0.0)
+			      (make-vect 1.0 0.0)
+			      split-point)))
+	  (paint-top
+	   (transform-painter painter2
+			      split-point
+			      (make-vect 1.0 0.5)
+			      (make-vect 0.0 1.0))))
+      (lambda (frame)
+	(paint-bottom frame)
+	(paint-top frame)))))
+; second time in terms of beside and rotation
+(define (below painter1 painter2)
+  (let ((p1 (rotate270 painter1))
+	(p2 (rotate270 painter2)))
+    (let ((bes (beside p1 p2)))
+      (rotate90 bes))))
+; 2.52
+; a - skip
+; b
+(define (corner-split painter n)
+  (if (= n 0)
+      painter
+      (let ((up (up-split painter (- n 1)))
+	    (right (right-split painter (- n 1))))
+	(let ((top-left up)
+	      (bottom-right right)
+	      (corner (corner-split painter (- n 1))))
+	  (beside (below painter top-left)
+		  (below bottom-right corner))))))
+; c
+(define (square-limit painter n)
+  (let ((combine4 (square-of-four flip-horiz identity
+				  flip-horiz identity)))
+    (combine4 (corner-split painter n))))
+
+; 2.3
+
+(define (memq item x)
+  (cond ((null? x) false)
+	((eq? item (car x)) x)
+	(else (memq item (cdr x)))))
+
+; 2.53
+; (a b c)
+(list 'a 'b 'c)
+; ((george))
+(list (list 'george))
+; ((y1 y2))
+(cdr '((x1 x2) (y1 y2)))
+; (y1 y2)
+(cadr '((x1 x2) (y1 y2)))
+; #f
+(pair? (car '(a short list)))
+; #f
+(memq 'red '((red shoes) (blue socks)))
+; (red shoes blue socks)
+(memq 'red '(red shoes blue socks))
+
+; 2.54
+(define (equal? a b)
+  (cond ((and (not (pair? a)) (not (pair? b)))
+	 (eq? a b))
+	((and (pair? a) (pair? b))
+	 (and (eq? (car a) (car b))
+	      (equal? (cdr a) (cdr b))))
+	(else
+	 #f)))
+
+; 2.55
+(car ''abracadabra)
+
+(define (variable? x) (symbol? x))
+(define (same-variable? v1 v2)
+  (and (variable? v1) (variable? v2) (eq? v1 v2)))
+(define (make-sum a1 a2) (list '+ a1 a2))
+(define (make-product m1 m2) (list '* m1 m2))
+(define (sum? x)
+  (and (pair? x) (eq? (car x) '+)))
+(define (addend s) (cadr s))
+(define (augend s) (caddr s))
+(define (product? x)
+  (and (pair? x) (eq? (car x) '*)))
+(define (multiplier p) (cadr p))
+(define (multiplicand p) (caddr p))
+; 2.56
+(define (deriv exp var)
+  (cond ((number? exp) 0)
+	((variable? exp)
+	 (if (same-variable? exp var) 1 0))
+	((sum? exp)
+	 (make-sum (deriv (addend exp) var)
+		   (deriv (augend exp) var)))
+	((product? exp)
+	 (make-sum
+	  (make-product (multiplier exp)
+			(deriv (multiplicand exp) var))
+	  (make-product (deriv (multiplier exp) var)
+			(multiplicand exp))))
+	((exponentiation? exp)
+	 (make-product
+	  (make-product (exponent exp)
+			(make-exponentiation (base exp)
+					     (- (exponent exp) 1)))
+	  (deriv (base exp) x)))
+	(else
+	 (error "unknown expression type -- DERIV" exp))))
+(define (make-exponentiation base exp)
+  (cond ((= exp 0) 1)
+	((= exp 1) base)
+	(else (list '** base exp))))
+(define (base x)
+  (cadr x))
+(define (exponent x)
+  (caddr x))
+(define (exponentiation? x)
+  (and (pair? x)
+       (eq? '** (car x))))
+; 2.57
+(define (make-sum a1 a2) (list '+ a1 a2))
+(define (make-sum a1 a2)
+  ()
+(define (unroll x)
+  (if (null? x)
+      x
+      (unroll (cdr x))))
+(define (make-product m1 m2) (list '* m1 m2))
+(define (sum? x)
+  (and (pair? x) (eq? (car x) '+)))
+(define (addend s) (cadr s))
+(define (augend s)
+  (if (pair? (cdr (cddr s)))
+      (cons '+ (cddr s))
+      (caddr s)))
+(define (augend s)
+  (if (pair? (cdr (cddr s)))
+      (make-sum (caddr s) (cddr s))
+      (caddr s)))
+(define (product? x)
+  (and (pair? x) (eq? (car x) '*)))
+(define (multiplier p) (cadr p))
+(define (multiplicand p)
+  (if (pair? (cdr (cddr p)))
+      (cons '* (cddr p))
+      (caddr p)))
