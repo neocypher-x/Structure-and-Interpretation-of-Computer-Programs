@@ -1231,7 +1231,6 @@
       (caddr p)))
 
 ; Sets as unordered lists
-; 2.59
 (define (element-of-set? x set)
   (cond ((null? set) false)
 	((equal? x (car set)) true)
@@ -1248,10 +1247,33 @@
 	 (cons (car set1)
 	       (intersection-set (cdr set1) set2)))
 	(else (intersection-set (cdr set1) set2))))
+; 2.59
 ; if set1 is null, then set2. If set1 is not null, then set1 if set2 is null. Otherwise, continue.
 (define (union-set set1 set2)
   (if (null? set1)
       set2
       (if (null? set2)
 	  set1
-	  ())))
+	  (if (element-of-set? (car set1) set2)
+	      (union-set (cdr set1) set2)
+	      (cons (car set1) (union-set (cdr set1) set2))))))
+(define (union-set set1 set2)
+  (cond ((null? set1) set2)
+	((null? set2) set1)
+	((element-of-set? (car set1) set2)
+	 (union-set (cdr set1) set2))
+	(else (cons (car set1)
+		    (union-set (cdr set1) set2)))))
+; 2.60
+; Allow for repeating elements in a set
+; element-of-set? stays the same
+(define (adjoin-set x set)
+  (cons x set))
+(define (union-set set1 set)
+  (append set1 set2))
+; intersection-set can stay the same.
+
+; the running time for adjoin-set goes from O(n) to O(1)
+; the running time for union-set goes from O(mn) to the running time of append, where m and n are sizes of set1 and set2.
+
+; The increase in performance over the cost of unique set representations would be useful for cases where we use adjoin-set a lot or union-set.
