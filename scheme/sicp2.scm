@@ -1249,6 +1249,7 @@
 	(else (intersection-set (cdr set1) set2))))
 ; 2.59
 ; if set1 is null, then set2. If set1 is not null, then set1 if set2 is null. Otherwise, continue.
+; two equivalent representations. The second implementation is more uniform.
 (define (union-set set1 set2)
   (if (null? set1)
       set2
