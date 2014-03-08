@@ -1066,6 +1066,8 @@
 
 ; 2.55
 (car ''abracadabra)
+; ''~ is a list, where ' is the first element and symbol ~
+; is the other element.
 
 (define (variable? x) (symbol? x))
 (define (same-variable? v1 v2)
@@ -1080,6 +1082,7 @@
   (and (pair? x) (eq? (car x) '*)))
 (define (multiplier p) (cadr p))
 (define (multiplicand p) (caddr p))
+
 ; 2.56
 (define (deriv exp var)
   (cond ((number? exp) 0)
@@ -1105,7 +1108,7 @@
 (define (make-exponentiation base exp)
   (cond ((= exp 0) 1)
 	((= exp 1) base)
-	(else (list '** base exp))))
+ 	(else (list '** base exp))))
 (define (base x)
   (cadr x))
 (define (exponent x)
@@ -1114,29 +1117,141 @@
   (and (pair? x)
        (eq? '** (car x))))
 ; 2.57
-(define (make-sum a1 a2) (list '+ a1 a2))
-(define (make-sum a1 a2)
-  ()
-(define (unroll x)
-  (if (null? x)
-      x
-      (unroll (cdr x))))
-(define (make-product m1 m2) (list '* m1 m2))
+; implementation works thus far only for representations
+; where arguments to make-sum and make-product are
+; themselves sums or products, not yet for just lists
+; of numbers
+(define (sumOrProd? exp)
+  (or (sum? exp) (product? exp)))
 (define (sum? x)
   (and (pair? x) (eq? (car x) '+)))
 (define (addend s) (cadr s))
+; deriv of sums will be nested expressions
+; argments will be single numbers or expressions
+(define (make-sum a1 a2)
+  (if (or (sumOrProd? a1) (sumOrProd? a2))
+      (cons '+ (list a1 a2))
+      (list '+ a1 a2)))
 (define (augend s)
   (if (pair? (cdr (cddr s)))
       (cons '+ (cddr s))
       (caddr s)))
-(define (augend s)
-  (if (pair? (cdr (cddr s)))
-      (make-sum (caddr s) (cddr s))
-      (caddr s)))
 (define (product? x)
   (and (pair? x) (eq? (car x) '*)))
 (define (multiplier p) (cadr p))
+; deriv of products should be nested expressions
+(define (make-product a1 a2)
+  (if (or (sumOrProd? a1) (sumOrProd? a2))
+      (cons '* (list a1 a2))
+      (list '* a1 a2)))
 (define (multiplicand p)
   (if (pair? (cdr (cddr p)))
       (cons '* (cddr p))
       (caddr p)))
+
+; The below two implementations were started but not
+; finished, to include arguments of list of numbers
+
+; deriv of sums will given as a single list
+; arguments can be list of numbers, expressions or singles
+(define (make-sum a1 a2)
+  (cond ((sum? a2)
+	 (cons '+ (cons a1 (cdr a2))))
+	((and (pair? a1) (pair? a2))
+	 (cons '+ (append a1 a2)))
+	((and (pair? a1) (not (pair? a2)))
+	 (cons '+ (append a1 (list a2))))
+	((and (not (pair? a1)) (pair? a2))
+	 (if (sumOrProd? a2)
+	     (cons '+ (cons a1 (list a2)))
+	     (cons '+ (cons a1 a2))))	     
+	(else (list '+ a1 a2))))
+(define (augend s)
+  (if (pair? (cdr (cddr s)))
+      (make-sum (caddr s) (cdddr s))
+      (caddr s)))
+; deriv of products should be a single list
+(define (make-product a1 a2)
+  (cond ((product? a2)
+	 (cons '* (cons a1 (cdr a2))))
+	((and (pair? a1) (pair? a2))
+	 (cons '* (append a1 a2)))
+	((and (pair? a1) (not (pair? a2)))
+	 (cons '* (append a1 (list a2))))
+	((and (not (pair? a1)) (pair? a2))
+	 (cons '* (cons a1 (list a2))))
+	(else (list '* a1 a2))))
+(define (multiplicand p)
+  (if (pair? (cdr (cddr p)))
+      (cons '* (cddr p))
+      (caddr p)))
+
+; 2.58
+; a
+(define (sum? x)
+  (and (pair? x) (eq? (cadr x) '+)))
+(define (make-sum a1 a2) (list a1 '+ a2))
+(define (addend s) (car s))
+(define (augend s) (caddr s))
+
+(define (product? x)
+  (and (pair? x) (eq? (cadr x) '*)))
+(define (make-product m1 m2) (list m1 '* m2))
+(define (multiplier p) (car p))
+(define (multiplicand p) (caddr p))
+; b
+; Multiplication distributes over a list expression, whereas
+; addition does not. We can assume that both arguments to 
+; addition will have been evaluated. We have to evaluate
+; all parenthetical expressions, then products, then sums.
+
+; Works on (x + 3 * (x + y + 2)).
+
+; yet to develop working implementation for (x * y + z)
+(define (sum? x)
+  (and (pair? x) (eq? (cadr x) '+)))
+(define (make-sum a1 a2) (list a1 '+ a2))
+(define (addend s) (car s))
+(define (augend s)
+  (if (pair? s)
+      (if (null? (cdddr s))
+	  (caddr s)
+	  (cddr s))
+      (caddr s)))
+
+(define (product? x)
+  (and (pair? x) (eq? (cadr x) '*)))
+(define (make-product m1 m2) (list m1 '* m2))
+(define (multiplier p) (car p))
+(define (multiplicand p)
+  (if (pair? p)
+      (if (null? (cdddr p))
+	  (caddr p)
+	  (cddr p))
+      (caddr p)))
+
+; Sets as unordered lists
+; 2.59
+(define (element-of-set? x set)
+  (cond ((null? set) false)
+	((equal? x (car set)) true)
+	(else (element-of-set? x (cdr set)))))
+
+(define (adjoin-set x set)
+  (if (element-of-set? x set)
+      set
+      (cons x set)))
+
+(define (intersection-set set1 set2)
+  (cond ((or (null? set1) (null? set2)) '())
+	((element-of-set? (car set1) set2)
+	 (cons (car set1)
+	       (intersection-set (cdr set1) set2)))
+	(else (intersection-set (cdr set1) set2))))
+; if set1 is null, then set2. If set1 is not null, then set1 if set2 is null. Otherwise, continue.
+(define (union-set set1 set2)
+  (if (null? set1)
+      set2
+      (if (null? set2)
+	  set1
+	  ())))
