@@ -1278,3 +1278,49 @@
 ; the running time for union-set goes from O(mn) to the running time of append, where m and n are sizes of set1 and set2.
 
 ; The increase in performance over the cost of unique set representations would be useful for cases where we use adjoin-set a lot or union-set.
+
+; Sets as ordered lists
+(define (element-of-set? x set)
+  (cond ((null? set) false)
+	((= x (car set)) true)
+	((< x (car set)) false)
+	(else (element-of-set? x (cdr set)))))
+
+(define (intersection-set set1 set2)
+  (if (or (null? set1) (null? set2))
+       '()
+       (let ((x1 (car set1)) (x2 (car set2)))
+	 (cond ((= x1 x2)
+		(cons x1 (intersection-set (cdr set1)
+					   (cdr set2))))
+	       ((< x1 x2)
+		(intersection-set (cdr set1) set2))
+	       ((< x2 x1)
+		(intersection-set set1 (cdr set2)))))))
+
+; 2.61
+; on average, x will be in the middle of the list so that the running time is half
+; that of adjoin-set for the onordered set representation
+(define (adjoin-set x set)
+  (cond ((null? set) ())
+	((< x (car set)) (cons x set))
+	((= x (car set)) set)
+	(else (append (list (car set)) (adjoin-set x (cdr set))))))
+
+; 2.62
+(define (union-set set1 set2)
+  (cond ((null? set1) set2)
+	((null? set2) set1)
+	(else (let ((x1 (car set1)) (x2 (car set2)))
+		(cond ((= x1 x2)
+		       (cons x1
+			     (union-set (cdr set1)
+					(cdr set2))))
+		      ((< x1 x2)
+		       (cons x1
+			     (union-set (cdr set1)
+					set2)))
+		      ((> x1 x2)
+		       (cons x2
+			     (union-set set1
+					(cdr set2)))))))))
