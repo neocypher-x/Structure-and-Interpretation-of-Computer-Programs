@@ -213,10 +213,16 @@
 	  (d1 (car d2)))
 	  (dotimes (i d1 0)
 	    (dotimes (j d1 0)
-	      (format t "~A" (aref arr i j))
-	      (setf (aref ret j (- (- d1 1) i)) (aref arr i j)))
-	    (format t "~%"))
+	      (setf (aref ret j (- (- d1 1) i))
+		    (aref arr i j))))
 	  ret)))
 	  
 (setf arr (make-array '(3 3) :initial-contents '((1 2 3) (4 5 6) (7 8 9))))
 (setf arr (make-array '(4 4) :initial-contents '((1 2 3 4) (5 6 7 8) (9 10 11 12) (13 14 15 16))))
+
+; 2
+; copy-list is useful for destructive functions such as sort
+(defun copy-list (lst)
+  (reduce #'cons lst :from-end t :initial-value ()))
+(defun reverse (lst)
+  (reduce #'(lambda (x y) (append y x)) (mapcar #'list lst) :from-end t))
