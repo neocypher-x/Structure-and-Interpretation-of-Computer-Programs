@@ -1331,7 +1331,7 @@
 (define (make-tree entry left right)
   (list entry left right))
 
-(defien (element-of-et? x set)
+(define (element-of-set? x set)
   (cond ((null? set) ())
 	((= x (entry set)) true)
 	((< x (entry set))
@@ -1350,3 +1350,38 @@
 	 (make-tree (entry set)
 		    (left-branch set)
 		    (adjoin-set x (right-branch set))))))
+
+; 2.63
+(define (tree->list-1 tree)
+  (if (null? tree)
+      '()
+      (append (tree->list-1 (left-branch tree))
+	      (cons (entry tree)
+		    (tree->list-1 (right-branch tree))))))
+(define (tree->list-2 tree)
+  (define (copy-to-list tree result-list)
+    (if (null? tree)
+	result-list
+	(copy-to-list (left-branch tree)
+		      (cons (entry tree)
+			    (copy-to-list (right-branch tree)
+					  result-list)))))
+  (copy-to-list tree '()))
+
+(define x (make-tree 5 '() '()))
+(element-of-set? 7 x)
+(define x (adjoin-set 1 x))
+(define x (adjoin-set 7 x))
+(define x (adjoin-set 5 x))
+(define x (adjoin-set 9 x))
+(define x (adjoin-set 3 x))
+(define x (adjoin-set 11 x))
+(define x (adjoin-set 12 x))
+(tree->list-1 x)
+(tree->list-2 x)
+; a
+; They produce the same result for every tree.
+; (1 3 5 7 9 11) are printed for the trees in figure 2.16
+
+; b
+; The two procedures have the same order of growth.
