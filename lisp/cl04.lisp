@@ -226,3 +226,19 @@
   (reduce #'cons lst :from-end t :initial-value ()))
 (defun reverse (lst)
   (reduce #'(lambda (x y) (append y x)) (mapcar #'list lst) :from-end t))
+
+; 3
+(defstruct tri-node
+  data
+  left
+  center
+  right)
+; a
+(defun my-copy-tri-node (src)
+  (make-tri-node
+   :data (tri-node-data src)
+   :left (tri-node-left src)
+   :center (tri-node-center src)
+   :right (tri-node-right src)))
+; b
+
