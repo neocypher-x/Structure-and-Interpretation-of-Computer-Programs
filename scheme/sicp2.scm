@@ -1405,3 +1405,7 @@
 		(cons (make-tree this-entry left-tree right-tree)
 		      remaining-elts))))))))
 ; a
+; Partial tree works by selecting the n/2th element as the root of the current tree. It then takes the left (n - 1)/2 elements and calls itself to form a subtree with all elements less than the current root element. This is possible because the list is ordered. It does the same with the rightmost n/2 elements but this time with the property that they all are elements greater than the current root. Since the method picks the middle element at each recursion level, this ensures there are equal elements in both subtrees. It can be shown that thisprocess will produced a balanced binary tree through induction on n.
+
+; b
+; The order of growth in number of recursive calls to partial tree grows as 2^n.
