@@ -1384,4 +1384,24 @@
 ; (1 3 5 7 9 11) are printed for the trees in figure 2.16
 
 ; b
-; The two procedures have the same order of growth.
+; The two procedures differ in their order growth primarily because one method uses append and the other uses cons. Cons runs constant time. Append from the definition of 2.2.1 indicates a running time linear in the size of the first argument. Hence, tree->list-2 slower. tree->list-1 grows more slowly as n grows.
+
+; 2.64
+(define (list->tree elements)
+  (car (partial-tree elements (length elements))))
+(define (partial-tree elts n)
+  (if (= n 0)
+      (cons '() elts )
+      (let ((left-size (quotient (- n 1) 2)))
+	(let ((left-result (partial-tree elts left-size)))
+	  (let ((left-tree (car left-result))
+		(non-left-elts (cdr left-result))
+		(right-size (- n (+ left-size 1))))
+	    (let ((this-entry (car non-left-elts))
+		  (right-result (partial-tree (cdr non-left-elts)
+					      right-size)))
+	      (let ((right-tree (car right-result))
+		    (remaining-elts (cdr right-result)))
+		(cons (make-tree this-entry left-tree right-tree)
+		      remaining-elts))))))))
+; a
