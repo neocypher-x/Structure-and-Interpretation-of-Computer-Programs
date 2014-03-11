@@ -229,16 +229,29 @@
 
 ; 3
 (defstruct tri-node
-  data
-  left
-  center
-  right)
+  elt
+  (l nil)
+  (m nil)
+  (r nil))
 ; a
-(defun my-copy-tri-node (src)
-  (make-tri-node
-   :data (tri-node-data src)
-   :left (tri-node-left src)
-   :center (tri-node-center src)
-   :right (tri-node-right src)))
+(defun copy-tri-tree (src)
+  (if (null src)
+      nil
+      (make-tri-node
+       :elt (tri-node-elt src)
+       :l (copy-tri-tree (tri-node-l src))
+       :m (copy-tri-tree (tri-node-m src))
+       :r (copy-tri-tree (tri-node-r src)))))
+(setf x (make-tri-node :elt 3))
+(setf y (make-tri-node :elt 5))
+(setf z (make-tri-node :elt 1))
+(setf v (make-tri-node :elt 0 :l x :m y :r z))
+(setf w (copy-tri-tree v))
 ; b
-
+(defun element-of-tree? (x tree)
+  (cond ((null tree) nil)
+	((equal x (tri-node-elt tree)) T)
+	(t (or (element-of-tree? x (tri-node-l tree))
+		  (element-of-tree? x (tri-node-m tree))
+		  (element-of-tree? x (tri-node-r tree))))))
+(element-of-tree? 3 v)
