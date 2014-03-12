@@ -1476,3 +1476,16 @@
 (define y (list->tree y))
 (tree->list-2 (union-set-binary-trees x y))
 (tree->list-2 (intersection-set-binary-trees x y))
+
+; 2.66
+; returns the subtree where the root matches the given-key,
+; or false if no such entry matches the given-key
+(define (lookup given-key set-of-records)
+  (cond ((null? set-of-records) false)
+	((= given-key (entry set-of-records))
+	 set-of-records)
+	((< given-key (entry set-of-records))
+	 (lookup given-key (left-branch set-of-records)))
+	((> given-key (entry set-of-records))
+	 (lookup given-key (right-branch set-of-records)))))
+(lookup 12 x)
