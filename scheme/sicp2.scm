@@ -1248,8 +1248,9 @@
 	       (intersection-set (cdr set1) set2)))
 	(else (intersection-set (cdr set1) set2))))
 ; 2.59
-; if set1 is null, then set2. If set1 is not null, then set1 if set2 is null. Otherwise, continue.
-; two equivalent representations. The second implementation is more uniform.
+; if set1 is null, then set2. If set1 is not null, then set1
+; if set2 is null. Otherwise, continue. two equivalent
+; representations. The second implementation is more uniform.
 (define (union-set set1 set2)
   (if (null? set1)
       set2
@@ -1275,9 +1276,12 @@
 ; intersection-set can stay the same.
 
 ; the running time for adjoin-set goes from O(n) to O(1)
-; the running time for union-set goes from O(mn) to the running time of append, where m and n are sizes of set1 and set2.
+; the running time for union-set goes from O(mn) to the
+; running time of append, where m and n are sizes of set1 and set2.
 
-; The increase in performance over the cost of unique set representations would be useful for cases where we use adjoin-set a lot or union-set.
+; The increase in performance over the cost of unique set
+; representations would be useful for cases where we use
+; adjoin-set a lot or union-set.
 
 ; Sets as ordered lists
 (define (element-of-set? x set)
@@ -1299,8 +1303,9 @@
 		(intersection-set-ordered-lists set1 (cdr set2)))))))
 
 ; 2.61
-; on average, x will be in the middle of the list so that the running time is half
-; that of adjoin-set for the onordered set representation
+; on average, x will be in the middle of the list so that the
+; running time is half that of adjoin-set for the onordered
+; set representation
 (define (adjoin-set x set)
   (cond ((null? set) ())
 	((< x (car set)) (cons x set))
@@ -1384,7 +1389,16 @@
 ; (1 3 5 7 9 11) are printed for the trees in figure 2.16
 
 ; b
-; Each procedure must visit each node, so the running time is at least O(n). However, for each iteration or recursion level, the running time differs slightly. tree->list-2 only calls cons, which is constant time so that the total running time of tree->list-2 is O(n). On the other hand, tree->list-1 calls append which from the definition in 2.2.1 has a running time proportional to the size of the first list argument. The first argument to this append halves for each successive call, so that the contribution on each recursive level is log(n). Hence, the total running time of tree->list-1 will be O(nlogn).
+; Each procedure must visit each node, so the running time is at
+; least O(n). However, for each iteration or recursion level,
+; the running time differs slightly. tree->list-2 only calls
+; cons, which is constant time so that the total running time of
+; tree->list-2 is O(n). On the other hand, tree->list-1 calls
+; append which from the definition in 2.2.1 has a running time
+; proportional to the size of the first list argument. The first
+; argument to this append halves for each successive call, so
+; that the contribution on each recursive level is log(n).
+; Hence, the total running time of tree->list-1 will be O(nlogn).
 
 ; 2.64
 (define (list->tree elements)
@@ -1405,7 +1419,16 @@
 		(cons (make-tree this-entry left-tree right-tree)
 		      remaining-elts))))))))
 ; a
-; Partial tree works by selecting the n/2th element as the root of the current tree. It then takes the left (n - 1)/2 elements and calls itself to form a subtree with all elements less than the current root element. This is possible because the list is ordered. It does the same with the rightmost n/2 elements but this time with the property that they all are elements greater than the current root. Since the method picks the middle element at each recursion level, this ensures there are equal elements in both subtrees. It can be shown that thisprocess will produced a balanced binary tree through induction on n.
+; Partial tree works by selecting the n/2th element as the root
+; of the current tree. It then takes the left (n - 1)/2 elements
+; and calls itself to form a subtree with all elements less than
+; the current root element. This is possible because the list is
+; ordered. It does the same with the rightmost n/2 elements but
+; this time with the property that they all are elements greater
+; than the current root. Since the method picks the middle
+; element at each recursion level, this ensures there are equal
+; elements in both subtrees. It can be shown that this process
+; will produced a balanced binary tree through induction on n.
 (list->tree '(1 3 5 7 9 11))
 ;          5
 ;       /     \
@@ -1414,21 +1437,38 @@
 ;        3   7   11
 
 ; b
-; Each node must be visited once, and the work done at each recursive call is independent of n. Hence the order of growth is O(n).
+; Each node must be visited once, and the work done at each
+; recursive call is independent of n. Hence the order of growth
+; is O(n).
 
 ; 2.65
-; We can combine several methods from 2.63, 2.64 and the section on sets as ordered lists that have running times of O(n) to produce O(n) implementations of union-set and intersection-set for sets implemented as binary trees. Given a binary tree, use tree->list-2 to convert it to an ordered list with a running time of O(n). Next, since the list is ordered we can use intersection-set or union-set from the section of sets as ordered lists to produce an ordered list that's an intersection or union of the two lists, respectively. This also has running time O(n). Finally, use the list->tree procedure to convert the ordered list to a balanced binary tree. This procedure has running time O(n). Hence, O(n) + O(n) + O(n) = O(n).
+; We can combine several methods from 2.63, 2.64 and the
+; section on sets as ordered lists that have running times of
+; O(n) to produce O(n) implementations of union-set and
+; intersection-set for sets implemented as binary trees. Given
+; a binary tree, use tree->list-2 to convert it to an ordered
+; list with a running time of O(n). Next, since the list is
+; ordered we can use intersection-set or union-set from the
+; section of sets as ordered lists to produce an ordered list
+; that's an intersection or union of the two lists,
+; respectively. This also has running time O(n). Finally, use
+; the list->tree procedure to convert the ordered list to a
+; balanced binary tree. This procedure has running time O(n).
+; Hence, O(n) + O(n) + O(n) = O(n).
 
 ; Helper function to union-set and intersection-set
 (define (sets-apply set1 set2 method)
   (let ((lst1 (tree->list-2 set1))
 	(lst2 (tree->list-2 set2)))
     (let ((result (method lst1 lst2)))
-      (list->tree result)))) ; where union-set-ordered-lists is defined in 2.62
+      (list->tree result)))) 
+        ; where union-set-ordered-lists is defined in 2.62
 (define (union-set-binary-trees set1 set2)
   (sets-apply set1 set2 union-set-ordered-lists))
 (define (intersection-set-binary-trees set1 set2)
-  (sets-apply set1 set2 intersection-set-ordered-lists)) ; where intersection-set-ordered-lists is intersection-set defined for sets as ordered lists
+  (sets-apply set1 set2 intersection-set-ordered-lists)) 
+       ; where intersection-set-ordered-lists is
+       ;intersection-set defined for sets as ordered lists
 ; test
 (define x '(1 3 5 7 9 11))
 (define x (list->tree x))
