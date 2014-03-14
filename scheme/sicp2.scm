@@ -1552,3 +1552,15 @@
 				   (make-leaf 'C 1)))))
 (define sample-message '(0 1 1 0 0 1 0 1 0 1 1 1 0))
 ; (a d a b b c a)
+
+; 2.68
+(define (encode message tree)
+  (if (null? message)
+      '()
+      (append (encode-symbol (car message) tree
+			     (encode (cdr message) tree)))))
+(define (encode-symbol sym tree)
+  (define ((helper sym tree results))
+    (cond ((element-of-set? (symbols (left-branch tree)))
+	   (if ((leaf? tree)
+		))))))
