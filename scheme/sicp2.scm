@@ -1540,7 +1540,7 @@
   (if (null? pairs)
       '()
       (let ((pair (car pairs)))
-	(adjoni-set (make-leaf (car pair)
+	(adjoin-set (make-leaf (car pair)
 			       (cadr pair))
 		    (make-leaf-set (cdr pairs))))))
 ; 2.67
@@ -1557,10 +1557,22 @@
 (define (encode message tree)
   (if (null? message)
       '()
-      (append (encode-symbol (car message) tree
-			     (encode (cdr message) tree)))))
+      (append (encode-symbol (car message) tree)
+			     (encode (cdr message) tree))))
 (define (encode-symbol sym tree)
-  (define ((helper sym tree results))
-    (cond ((element-of-set? (symbols (left-branch tree)))
-	   (if ((leaf? tree)
-		))))))
+  (define (helper sym tree result)
+    (cond ((leaf? tree) (cons result ()))
+	  ((element-of-set? sym (symbols (left-branch tree)))
+	   (helper sym (left-branch tree) (cons 0 result)))
+	  ((element-of-set? sym (symbols (right-branch tree)))
+	   (helper sym (right-branch tree) (cons 1 result)))
+	  (else (error "Symbol not in tree" sym))))
+  (helper sym tree ()))
+
+; 2.69
+(define (generate-huffman-tree pairs)
+  (successive-merge (make-leaf-set pairs)))
+(define (successive-merge leaves)
+  (if (null? (cdr leaves))
+      leaves
+      ))
