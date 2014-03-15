@@ -1582,8 +1582,8 @@
   (if (null? (cdr leaves))
       (car leaves)
       (successive-merge (adjoin-set
-			 (make-code-tree (car leaves)
-					 (cadr leaves))
+			 (make-code-tree (cadr leaves)
+					 (car leaves))
 			 (cddr leaves)))))
 (define test-tree (generate-huffman-tree '((A 4) (B 2) (C 1) (D 1))))
 
@@ -1591,13 +1591,13 @@
 (define 8tree (generate-huffman-tree '((A 2) (BOOM 1) (GET 2) (JOB 2)
 				       (NA 16) (SHA 3) (YIP 9) (WAH 1))))
 (encode '(Get a job) 8tree)
-; ((1 1 1 1 1) (0 0 1 1) (0 1 1 1 1))
+; ((0 0 0 0 0) (1 1 0 0) (1 0 0 0 0)) 
 (encode '(Sha na na na na na na na na) 8tree)
-; ((0 1 1 1) (0) (0) (0) (0) (0) (0) (0) (0))
+; ((1 0 0 0) (1) (1) (1) (1) (1) (1) (1) (1)) 
 (encode '(Wah yip yip yip yip yip yip yip yip yip) 8tree)
-; ((0 1 0 1 1) (0 1) (0 1) (0 1) (0 1) (0 1) (0 1) (0 1) (0 1) (0 1))
+; ((1 0 1 0 0) (1 0) (1 0) (1 0) (1 0) (1 0) (1 0) (1 0) (1 0) (1 0)) 
 (encode '(Sha boom) 8tree)
-; ((0 1 1 1) (1 1 0 1 1))
+; ((1 0 0 0) (0 0 1 0 0)) 
 
 ; 28 + 24 + 23 + 9 = 84 bits total for the whole song
 ; under variable length encoding.
@@ -1606,3 +1606,36 @@
 ; The song has a total of 36 symbols, and hence we
 ; will need 36 * 3 = 108 bits to encode the song if we
 ; were to use fix-length encoding.
+
+; 2.71
+(define 5tree (generate-huffman-tree '((a 1) (b 2) (c 4)
+				       (d 8) (e 16))))
+; tree for n = 5, where frequences of symbols are 2^(n-1)
+;         (a b c d e) 31
+;         /             \
+;       e 16       (a b c d) 16
+;                  /          \
+;               d 8         (a b c) 7
+;                           /        \
+;                         c 4     (b a) 3
+;                                 /      \
+;                                b 2     a 1
+; the n=10, the tree looks similar
+; For general n, 1 bit will always be used to encode
+; the most frequent symbol. It would take 2^(n-1)
+; bits to encode the least frequent symbol.
+
+; 2.72
+; For the most frequent symbol for the relative
+; frequencies given in 2.71, it would take worst case
+; O(n) steps to encode, because it would have to
+; search through the entire set of symbols. For the
+; frequent symbol, it would take O(n^2) steps, because
+; it would have to traverse the height of the tree
+; which grows linearly, and search through the set
+; of symbols which also grows linearly in n. Hence,
+; The general order of growth for encoding a symbol
+; is O(n), because of height traversal that grows
+; linearly in n, and work at each level due to 
+; searching through a set of symbols whose size grows
+; linearly in n.
