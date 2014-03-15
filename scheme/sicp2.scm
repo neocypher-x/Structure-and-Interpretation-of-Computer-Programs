@@ -1,3 +1,5 @@
+;; CHAPTER 2
+
 ; 2.1
 (define (make-rat n d)
   (let ((g (gcd n d)))
@@ -1560,6 +1562,10 @@
       (append (encode-symbol (car message) tree)
 			     (encode (cdr message) tree))))
 (define (encode-symbol sym tree)
+  (define (element-of-set? x set) ;unordered lists, because symbols may not be ordered
+    (cond ((null? set) false)
+	  ((equal? x (car set)) true)
+	  (else (element-of-set? x (cdr set)))))
   (define (helper sym tree result)
     (cond ((leaf? tree) (cons result ()))
 	  ((element-of-set? sym (symbols (left-branch tree)))
@@ -1574,5 +1580,29 @@
   (successive-merge (make-leaf-set pairs)))
 (define (successive-merge leaves)
   (if (null? (cdr leaves))
-      leaves
-      ))
+      (car leaves)
+      (successive-merge (adjoin-set
+			 (make-code-tree (car leaves)
+					 (cadr leaves))
+			 (cddr leaves)))))
+(define test-tree (generate-huffman-tree '((A 4) (B 2) (C 1) (D 1))))
+
+; 2.70
+(define 8tree (generate-huffman-tree '((A 2) (BOOM 1) (GET 2) (JOB 2)
+				       (NA 16) (SHA 3) (YIP 9) (WAH 1))))
+(encode '(Get a job) 8tree)
+; ((1 1 1 1 1) (0 0 1 1) (0 1 1 1 1))
+(encode '(Sha na na na na na na na na) 8tree)
+; ((0 1 1 1) (0) (0) (0) (0) (0) (0) (0) (0))
+(encode '(Wah yip yip yip yip yip yip yip yip yip) 8tree)
+; ((0 1 0 1 1) (0 1) (0 1) (0 1) (0 1) (0 1) (0 1) (0 1) (0 1) (0 1))
+(encode '(Sha boom) 8tree)
+; ((0 1 1 1) (1 1 0 1 1))
+
+; 28 + 24 + 23 + 9 = 84 bits total for the whole song
+; under variable length encoding.
+; For fixed length encoding, there are eight symbols 
+; so that we need 3 bits for every symbol that appears.
+; The song has a total of 36 symbols, and hence we
+; will need 36 * 3 = 108 bits to encode the song if we
+; were to use fix-length encoding.
