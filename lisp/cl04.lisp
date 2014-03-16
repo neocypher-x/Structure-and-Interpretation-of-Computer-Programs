@@ -255,3 +255,68 @@
 		  (element-of-tree? x (tri-node-m tree))
 		  (element-of-tree? x (tri-node-r tree))))))
 (element-of-tree? 3 v)
+
+; 4
+(setf n (make-node :elt 5 :l m :r o))
+(setf m (make-node :elt 3))
+(setf o (make-node :elt 7))
+
+; From SICP
+(defun tree->list1 (x)
+  (if (null x)
+      ()
+      (append (tree->list1 (node-l x))
+	      (cons (node-elt x)
+		    (tree->list1 (node-r x))))))
+(defun tree->list2 (x)
+  (defun copy-to-list (x result-list)
+    (if (null x)
+	result-list
+        (copy-to-list (node-l x)
+		      (cons (node-elt x)
+			    (copy-to-list (node-r x)
+					  result-list)))))
+  (copy-to-list x '()))
+
+; 5
+; Returns nil if insert was not successful
+; Otherwise returns what bst-insert returns, which
+; is the bst-tree after the insert.
+
+; bst-find returns non-nil only if the node-elt is eql
+; to obj, hence only add if result is nil.
+(defun bst-adjoin (obj bst <)
+  (if (null (bst-find obj bst <))
+      (bst-insert obj bst <)))
+
+; 6
+(setf alist '((a . x) (b . y) ( c . z)))
+(dolist (x alist)
+  (format t "~A" x))
+(defun assoc-to-hash (lst)
+  (defun helper (lst result)
+    (if (null lst)
+	result
+        (let ((elt (car lst)))
+	  (progn (setf (gethash (car elt) result)
+		       (cdr elt))
+		 (helper (cdr lst)
+			 result)))))
+  (helper lst (make-hash-table)))
+(assoc-to-hash alist)
+(setf ht (make-hash-table))
+(gethash 'color ht)
+(setf (gethash x ht) 'red)
+(defun hash-to-assoc (ht)
+  (defun helper (init)
+    (maphash #'(lambda (k v)
+		 (setf init (append init (list (cons k v)))))
+	     ht)
+    init)
+  (helper ()))
+(defun hash-to-assoc (ht)
+  (let ((init ()))
+    (maphash #'(lambda (k v)
+		 (setf init (append init (list (cons k v)))))
+	     ht)
+    init)) ; not sure why we don't use progn here
