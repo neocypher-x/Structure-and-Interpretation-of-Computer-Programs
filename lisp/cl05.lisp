@@ -56,7 +56,7 @@ n
 
 ; 3
 (defun sq-pos (x)
-  (if (> x 5)
+  (if (and (> x 5) (integerp x))
       (* x x)))
 
 ; 4
