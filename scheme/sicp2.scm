@@ -1639,3 +1639,81 @@
 ; linearly in n, and work at each level due to 
 ; searching through a set of symbols whose size grows
 ; linearly in n.
+
+; 2.73
+; a
+; The deriv procedure was turned into a data driven style,
+; where dispatch is performed on the deriv procedure and the
+; operator.
+; There is no "type tag" for expression types of number or
+; same variable. Hence, the operator procedure would not 
+; work on a number or variable. This means that the
+; appropriate deriv procedure for number or variable types
+; cannot be retrieved using (get <op> <type>).
+; b + c
+; the corresponding representation procedures for sums,
+; products, and exponentations are in exercise 2.57.
+
+(define (install-deriv-package)
+  ;; internal procedures
+  (define (deriv-sum terms)
+    (make-sum (deriv (addend terms))
+	      (deriv (augend terms))))    
+  (define (deriv-product terms)
+    (make-sum (make-product (deriv (multiplier terms))
+			    (multiplicand terms))
+	      (make-product (multiplier terms)
+			    (deriv (multiplicand terms)))))
+  (define (deriv-exponentiation terms)
+    (make-product
+     (make-product (exponent exp)
+		   (make-exponentiation (base exp)
+					(- (exponent exp) 1)))
+     (deriv (base exp) x)))
+  ;; interface to the rest of the system
+  (put 'deriv '+ deriv-sum)
+  (put 'deriv '* deriv-product)
+  (put 'deriv '** deriv-exponentiation)
+  'done)
+
+(map (lambda(x) x)
+     '(1 2 3 4 5))
+
+; d
+; The correponding changes we need to make are only in
+; flipping the order of indices are swapped in the put
+; procedure.
+
+; 2.74
+; a
+; takes personal file and employee name and returns the
+; employee's record
+(define (get-record file name)
+  ((get 'record file) name))
+; This assumes that there is a record function that is indexed by the personnel file, and that this record function takes in an employee name and returns the corresponding record object.
+; b
+; Although the problem staetment says that only the record
+; is given, we must assume the relevant personnel file is
+; available as well for this data-driven approach to work.
+(define (get-salary file record)
+  ((get 'salary file) record))
+; get should return a function salary, relevant for the
+; specific personnel file or division, that takes in an
+; employee record object and returns the employee's salary.
+; c
+(define (find-employee-record name files)
+  (cond ((null? files) #f)
+	(else
+	 (let ((record (get-record (car files) name)))
+	   (if record
+	       record
+	       (find-employee-record name (cdr files)))))))
+; this assumes that get-record returns false if no
+; such record is found. It returns the reord if found, and
+; the false if no such record is found.
+; d
+; For each new division's personnel files, a record and
+; salary function must be implemented and added to the 
+; data-driven table indexed by the personnel file. This is
+; done using the put method.
+
