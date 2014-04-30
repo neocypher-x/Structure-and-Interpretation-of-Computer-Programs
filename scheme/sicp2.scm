@@ -1717,3 +1717,34 @@
 ; data-driven table indexed by the personnel file. This is
 ; done using the put method.
 
+; Message Passing
+; 2.75
+(define (make-from-mag-ang r a)
+  (define (dispatch op)
+    (cond ((eq? op 'real-part) (* r (cos a)))
+	  ((eq? op 'imag-part) (* r (sin a)))
+	  ((eq? op 'magnitude) r)
+	  ((eq? op 'angle) a)
+	  (else
+	   (error "Unknown op -- MAKE-FROM-MAG-ANG" op))))
+  dispatch)
+; 2.76
+; Generic operations with explicit dispatch
+; New types require modifications to all generic operations
+; New operations will require a new function that must
+; handle all supported types
+; Data-directed style
+; New types require a new column in the table, or new
+; functions in quantity equal to the number of operations;
+; New operations will require a new row, or new functions
+; in quantity equal to the number of supported types.
+; Message-passing style
+; New types require a new procedure with an internal dispatch
+; procedure that handles all supported operations.
+; New operations require a modification to each of the
+; internal dispatch routines of the procedures that represent
+; the type.
+; For a system where new types must be often added, use the
+; message-passing style. For a system where new operations
+; must often be added, use the generic operations with
+; explicit dispatch.
