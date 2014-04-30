@@ -1690,7 +1690,10 @@
 ; employee's record
 (define (get-record file name)
   ((get 'record file) name))
-; This assumes that there is a record function that is indexed by the personnel file, and that this record function takes in an employee name and returns the corresponding record object.
+; This assumes that there is a record function that is
+; indexed by the personnel file, and that this record
+; function takes in an employee name and returns the
+; corresponding record object.
 ; b
 ; Although the problem staetment says that only the record
 ; is given, we must assume the relevant personnel file is
@@ -1748,3 +1751,71 @@
 ; message-passing style. For a system where new operations
 ; must often be added, use the generic operations with
 ; explicit dispatch.
+
+; 2.77
+; The structure in 2.24 as a list is represented with
+(cons 'complex (cons 'rectangular (cons 3 4)))
+; calling (magnitude z) results in the one function call to
+; apply-generic. Inside the this call to apply-generic,
+; calling type-tags on z results in a type-tag of complex.
+; The next instruction attempts to retrieve the relevant
+; magnitude function defined for type complex using the get
+; function. However, there is no such function and hence the
+; error.
+
+(define (apply-generic op . args)
+  (let ((type-tags (map type-tag args)))
+    (let ((proc (get op type-tags)))
+      (if proc
+	  (apply proc (map contents args))
+	  (error
+	   "No method for these types -- APPLY-GENERIC"
+	   (list op type-tags))))))
+
+(define (real-part z) (apply-generic 'real-part z))
+(define (imag-part z) (apply-generic 'imag-part z))
+(define (magnitude z) (apply-generic 'magnitude z))
+(define (angle z) (apply-generic 'angle z))
+
+; upon adding the four methods to the complex package by way
+; of 'put', the first apply-generic call retrieves type
+; complex, and does a get for operation magnitude. This get
+; call returns the magnitude function that was put due to
+; Alyssa's fix. This magnitude function is the same as the
+; one immediately above, and calls apply-generic a second
+; time. This time however, the z passed into the second
+; apply-generic call has its complex tag stripped off, and
+; so it is left with a type of rectangular. The second
+; apply-generic call then attempts to retrieve the magnitude
+; operation for type rectangular. This get call returns the
+; magnitude function that was put from the
+; install-rectangular-package. The resulting magnitude for
+; rectangular types takes its definition from the internal
+; magnitude procedure of install-rectangular package, and its
+; inner calls of real-part and imag-part take their
+; definitions from the internal procedures of
+; install-rectangular-package as well.
+
+; 2.78
+(define (attach-tag type-tag contents)
+  (if (number? contents)
+      contents
+      (cons type-tag contents)))
+(define (type-tag datum)
+  (cond ((pair? datum) (car datum))
+	((number? datum) 'scheme-number)
+	(else (error "Bad tagged datum -- TYPE-TAG" datum))))
+(define (contents datum)
+  (cond ((pair? datum) (cdr datum))
+	((number? datum) datum)
+        (else (error "Bad tagged datum -- CONTENTS" datum))))
+
+; 2.79
+(define (equ? a b)
+  )
+
+; 2.80
+(define (=zero? x)
+  (if (= (mul x x) 0)
+      #t
+      #f))
