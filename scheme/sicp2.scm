@@ -1752,6 +1752,29 @@
 ; must often be added, use the generic operations with
 ; explicit dispatch.
 
+; 2.5 Generic Arithmetic Operations
+(define (install-rational-package)
+  ;; internal procedures
+  (define (numer x) (car x))
+  (define (denom x) (cdr x))
+  (define (make-rat n d)
+    (let ((g (gcd n d)))
+      (cons (/ n g) (/ d g))))
+  (define (add-rat x y)
+    (make-rat (+ (* (numer x) (denom y))
+		 (* (numer y) (denom x)))
+	      (* (denom x) (denom y))))
+  (define (sub-rat x y)
+    (make-rat (- (* (numer x) (denom y))
+		 (* (numer y) (denom x)))
+	      (* (denom x) (denom y))))
+  (define (mul-rat x y)
+    (make-rat (* (numer x) (numer y))
+	      (* (denom x) (denom y))))
+  (define (div-rat x y)
+    (make-rat (* (numer x) (denom y))
+	      (* (denom x) (numer y)))))
+
 ; 2.77
 ; The structure in 2.24 as a list is represented with
 (cons 'complex (cons 'rectangular (cons 3 4)))
@@ -1811,11 +1834,20 @@
         (else (error "Bad tagged datum -- CONTENTS" datum))))
 
 ; 2.79
+; add the puts to the respective install package
+(put 'equ? '(rational)
+     (lambda (a b)
+       (and (= (numer a) (number b))
+	    (= (denom a) (denom b)))))
+(put 'equ? '(complex)
+     (lambda (a b)
+       ))
 (define (equ? a b)
-  )
+  (apply-generic 'equ? a b))
 
 ; 2.80
-(define (=zero? x)
-  (if (= (mul x x) 0)
-      #t
-      #f))
+; add the puts to the respective install package
+(put 'zero? '(rational)
+     (lambda (x) (= 0 (numer x))))
+(define (zero? x)
+  (apply-generic zero? x))
