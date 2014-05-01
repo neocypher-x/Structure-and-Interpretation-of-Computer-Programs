@@ -1834,20 +1834,45 @@
         (else (error "Bad tagged datum -- CONTENTS" datum))))
 
 ; 2.79
-; add the puts to the respective install package
-(put 'equ? '(rational)
-     (lambda (a b)
-       (and (= (numer a) (number b))
-	    (= (denom a) (denom b)))))
-(put 'equ? '(complex)
-     (lambda (a b)
-       ))
+; There are two potential solutions for the complex package.
+; one fits nicely with the rectangular representation for complex 
+; numbers, the other involves the polar representation.
+; Since the 'natural' selectors for the rectangular
+; representation are defined for polar and vice-versa, both
+; solutions are equally valid.
+; install-scheme-number-package
+(put 'equ? '(scheme-number) =)
+; install-rational-package
+(define equ?-rational (a b)
+  (and (= (numer a) (number b))
+       (= (denom a) (denom b))))
+(put 'equ? '(rational) equ?-rational)
+; install-complex-package
+(define equ?-complex (a b)
+  (and (= (real-part a) (real-part b))
+       (= (imag-part a) (imag-part b))))
+(define equ?-complex (a b)
+  (and (= (magnitude a) (magnitude b))
+       (= (angle a) (angle b))))
+(put 'equ? '(complex) equ?-complex)
 (define (equ? a b)
   (apply-generic 'equ? a b))
 
 ; 2.80
-; add the puts to the respective install package
-(put 'zero? '(rational)
-     (lambda (x) (= 0 (numer x))))
-(define (zero? x)
+; For similar reasons to 2.79, there are two solutions for
+; complex numbers
+; install-scheme-number-package
+(define =zero?-scheme-number (x)
+  (= x 0))
+(put '=zero? '(scheme-number) =zero?-scheme-number)
+; install-rational-package
+(define =zero?-rational (x) (= 0 (numer x)))
+(put '=zero? '(rational) =zero?-rational)
+; install-complex-package
+(define =zero?-complex (x)
+  (and (= (real-part x) 0)
+       (= (imag-part x) 0)))
+(define =zero?-complex (x)
+  (= (magnitude x) 0))
+(define (=zero? x)
   (apply-generic zero? x))
