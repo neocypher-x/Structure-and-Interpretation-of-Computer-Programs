@@ -1942,4 +1942,18 @@
                                 (list op type-tags))))))
               (error "No method for these types"
                      (list op type-tags)))))))
-; 
+; 2 cases bring up an issue with this approach
+
+; Suppose we have an operaton op that takes in 3
+; arguments of type aType, bType, and cType. Suppose
+; aType and bType can be coerced into each other. If
+; we passed into op three arguments of the following
+; respective types, bType, aType, and cType, apply
+; generic as implemented above would not coerce the
+; first two arguments and leave the third alone.
+
+; For the second case, suppose we pass in three
+; arguments to op with respective types dType, bType,
+; cType. Suppose dType could be coerced into aType.
+; apply generic as implemented above would not perform
+; the conversion from dType to aType.
