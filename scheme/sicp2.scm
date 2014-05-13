@@ -1921,28 +1921,39 @@
 		     (list op type-tags)))))))
 
 ; 2.82
-(define (apply-generic op . args)
-  (let ((type-tags (map type-tag args)))
+(define (apply-generic op. args)
+  ; returns process if coercion succeeds, #f otherwise
+  (define (try-coercion out-type in-types)
+    (define (try-coercion-iter cur-types)
+      (if (null? cur-types)
+	  #t
+	  (let ((coercion-result (get-coercion (car cur-types) out-type)))
+	    (if coercion-result
+		(and #t (try-coercion-iter (cdr cur-types)))
+		#f))))
+    (if (try-coercion-iter in-types)
+	(get op (map (lambda (type) out-type) in-types))
+	#f))
+  (define (outerloop type-tags)
+    (define (outerloop-iter cur-tags)
+      (if (null? type-tags)
+	  (error "Exhausted coercion attempts to find method")
+	  (let ((type (car type-tags)))
+	    (let ((proc (try-coercion type type-tags)))
+	      (if proc
+		  (apply proc (map contents args))
+		  (outerloop-iter (cdr cur-tags)))))))
+    (outerloop-iter type-tags))
+  (let ((type-tags (map type-tags args)))
     (let ((proc (get op type-tags)))
       (if proc
-          (apply proc (map contents args))
-          (if (= (length args) 2)
-              (let ((type1 (car type-tags))
-                    (type2 (cadr type-tags))
-                    (a1 (car args))
-                    (a2 (cadr args)))
-                (let ((t1->t2 (get-coercion type1 type2))
-                      (t2->t1 (get-coercion type2 type1)))
-                  (cond (t1->t2
-                         (apply-generic op (t1->t2 a1) a2))
-                        (t2->t1
-                         (apply-generic op a1 (t2->t1 a2)))
-                        (else
-                         (error "No method for these types"
-                                (list op type-tags))))))
-              (error "No method for these types"
-                     (list op type-tags)))))))
-; 2 cases bring up an issue with this approach
+	  (apply proc (map contents args))
+	  (if (> (length args) 1)
+              (outerloop type-tags)
+	      (error "No method for these types"
+		     (list op type-tags)))))))
+
+; 3 cases bring up an issue with the above implementation
 
 ; Suppose we have an operaton op that takes in 3
 ; arguments of type aType, bType, and cType. Suppose
@@ -1957,3 +1968,43 @@
 ; cType. Suppose dType could be coerced into aType.
 ; apply generic as implemented above would not perform
 ; the conversion from dType to aType.
+
+; For the third case, consider op which takes in
+; 3 arguments of type bType, bType, and cType. Suppose
+; cType can be coerced into bType, but aTYpe can be
+; coerced into cType. If we pass in aType, bTYpe, cType,
+; The above implementation would coerce the types to
+; bType, bTYpe, cType, and exit because of the failed
+; converion of cType to bTYpe.
+
+; There is a more elegant and concise solution that
+; may have a higher chance of success by fixing the
+; issue with the third case.
+
+(define (apply-generic op . args)  
+  (define (try-coercion out-type)
+    (lambda (arg)
+      (let ((in-type (type-tag arg)))
+	(let ((proc (get-coercion in-type out-type)))
+	  (if proc
+	      (proc arg)
+	      arg)))))
+  (define (outerloop type-tags)
+    (define (outerloop-iter cur-tags)
+      (if (null? type-tags)
+	  (error "Exhausted coercion attempts to find method")
+	  (let ((out-type (car type-tags)))
+	    (let ((coerced-args (map (try-coercion out-type) args)))
+	      (let ((proc coerced-args))
+		(if proc
+		    (apply proc coerced-args)
+		    (outerloop-iter (cdr cur-tags))))))))
+    (outerloop-iter type-tags))
+  (let ((type-tags (map type-tags args)))
+    (let ((proc (get op type-tags)))
+      (if proc
+	  (apply proc (map contents args))
+	  (if (> (length args) 1)
+              (outerloop type-tags)
+	      (error "No method for these types"
+		     (list op type-tags)))))))
