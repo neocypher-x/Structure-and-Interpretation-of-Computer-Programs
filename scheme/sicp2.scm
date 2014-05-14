@@ -1812,7 +1812,7 @@
 ; apply-generic call then attempts to retrieve the magnitude
 ; operation for type rectangular. This get call returns the
 ; magnitude function that was put from the
-; install-rectangular-package. The resulting magnitude for
+t; install-rectangular-package. The resulting magnitude for
 ; rectangular types takes its definition from the internal
 ; magnitude procedure of install-rectangular package, and its
 ; inner calls of real-part and imag-part take their
@@ -2008,3 +2008,27 @@
               (outerloop type-tags)
 	      (error "No method for these types"
 		     (list op type-tags)))))))
+
+; 2.83
+; accept raw value with no type information
+; returns raised value with no type information
+; add to scheme-number package
+(put 'raise 'integer (lambda (i)
+		       (make-rational i 1)))
+; add to rational package
+(put 'raise 'rational (lambda (q)
+			(/ (numer q) (denom q))))
+; add to real package
+(put 'raise 'real (lambda (r)
+		    (make-complex-from-real-imag r 0)))
+(define (raise x) (apply-generic 'raise x)))
+
+; 2.84
+(define (apply-generic op . args)
+  (let ((type-tags (map type-tag args)))
+    (let ((proc (get op type-tags)))
+      (if proc
+          (apply proc (map contents args))
+          (error
+            "No method for these types -- APPLY-GENERIC"
+            (list op type-tags))))))
