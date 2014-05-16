@@ -2024,6 +2024,19 @@ t; install-rectangular-package. The resulting magnitude for
 (define (raise x) (apply-generic 'raise x)))
 
 ; 2.84
+; Suppose we have two types, a and b. Let's try to determine which of the two types is higher in the tower. Without loss of generality, assume that b is a higher type than a. If we try to raise a first, eventually we will reach type b. If we raise b first, then we will eventually reach the top of the tower. In such a case, we know that a is of the lower type.
+
+; amongst the list of types, return the highest type
+; try to retrieve a procedure for the list of same types
+; if that is successful, then raise all args to that type and apply the retrieved procedure
+
+; first compare two types and return the one that is higher
+(define (compare-type a b)
+  (cond ((equal? a b) a)
+	(else #f))) 
+; retrieve proceud, if retrieval fails, a is the higher type.
+; if retrieval succeeds, check if raised a equals b.
+
 (define (apply-generic op . args)
   (let ((type-tags (map type-tag args)))
     (let ((proc (get op type-tags)))
@@ -2032,4 +2045,3 @@ t; install-rectangular-package. The resulting magnitude for
           (error
             "No method for these types -- APPLY-GENERIC"
             (list op type-tags))))))
-
