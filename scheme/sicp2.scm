@@ -2024,24 +2024,39 @@ t; install-rectangular-package. The resulting magnitude for
 (define (raise x) (apply-generic 'raise x)))
 
 ; 2.84
+; The solution below works for an arbitrary number of arguments
+; Adding new types is very simple and only involves the modification of one raise procedure as well as an addition of a new raise procedure in the general case. For the general case where a new type rests in between two types in the tower, modify the lower type's raise procedure to raise the object to the newly added type, and add a raise procedure that'll raise an object of the newly added type to that of the type immediately above it in the tower.
+
+; As a proof of concept, consider the following scenario:
 ; Suppose we have two types, a and b. Let's try to determine which of the two types is higher in the tower. Without loss of generality, assume that b is a higher type than a. If we try to raise a first, eventually we will reach type b. If we raise b first, then we will eventually reach the top of the tower. In such a case, we know that a is of the lower type.
 
+; The summary of our procedure is as follows:
 ; amongst the list of types, return the highest type
 ; try to retrieve a procedure for the list of same types
 ; if that is successful, then raise all args to that type and apply the retrieved procedure
 
-; first compare two types and return the one that is higher
-(define (compare-type a b)
-  (cond ((equal? a b) a)
-	(else #f))) 
-; retrieve proceud, if retrieval fails, a is the higher type.
-; if retrieval succeeds, check if raised a equals b.
-
+; Note:
+; accumulate will allow us to perform compare-type between the largest object found so far and each successive object in args
+; accumulate is defined around exercise 2.34
 (define (apply-generic op . args)
+  ; first compare two objects and return the object that is of a higher type
+  (define (compare-type a b)
+    (if (equal? (type-tag a) (type-tag b))
+	a
+	(let ((raise-a (get 'raise (type-tag a))))
+	  (if (null? raise-a)
+	      a
+	      (compare-type (raise-a a) b)))))
+  (define (get-type-list t args)
+    (map (lambda (x) t) args))
   (let ((type-tags (map type-tag args)))
     (let ((proc (get op type-tags)))
       (if proc
           (apply proc (map contents args))
-          (error
-            "No method for these types -- APPLY-GENERIC"
-            (list op type-tags))))))
+	  (let (top-type (type-tag (accumulate compare-type (car args) (cdr args))))
+	    (let ((proc-top-type (get op (get-type-list top-type args))))
+	      (if (proc-top-type)
+		  (apply proc-top-type (map contents args))
+		  (error
+		   "No method for these types -- APPLY-GENERIC"
+		   (list op type-tags)))))))))
