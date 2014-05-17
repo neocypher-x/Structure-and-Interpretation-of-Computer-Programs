@@ -21,3 +21,8 @@ allCombinationsSum = [ x+y | x <- [1,2,3], y <- [10,100,1000]]
 nouns = ["hobo","frog","pope"]
 adjectives = ["lazy", "grouchy", "scheming"]
 combineNounsAdjectives = [adjective ++ " " ++ noun | adjective <- adjectives, noun <- nouns]
+
+likeLispCar  = head [5,4,3,2,1]
+likeLispCdr = tail [5,4,3,2,1]
+
+length' xs = sum [1 | _ <- xs]
