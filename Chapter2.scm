@@ -2074,11 +2074,11 @@ t; install-rectangular-package. The resulting magnitude for
 		   "No method for these types -- APPLY-GENERIC"
 		   (list op type-tags)))))))))
 ; 2.85
-; install in complex package
+; add in complex package
 (put 'project '(omplex)
      (lambda (x)
        (make-scheme-number (real-part x))))
-; install in scheme-number package
+; add in scheme-number package
 (put 'project '(scheme-number)
      (lambda (x)
        (let ((y (inexact->exact x)))
@@ -2092,7 +2092,19 @@ t; install-rectangular-package. The resulting magnitude for
 (define (drop x)
   (let ((proj (get 'project (type-tag x))))
     (if proj
-	(if (equ? x (proj x))
-	    #t
-	    #f)
-	#f)))
+	(if (equ? x (raise (proj (contents x))))
+	    (drop (proj (contents x)))
+	    x)
+	x)))
+; the idea for modifying procedure 2.84 is to simplify the
+; result of applying op to transformed or non-transformed
+; args contents. However, drop is only defined for one
+; argument, so we must apply drop or simplify only if the
+; result of applying op is a single value.
+
+; Change 2.84 (apply proc (map contents args)) to
+;
+(if (list? (apply proc (map contents args)))
+    (apply proc (map contents args))
+    (drop (apply (proc ( map contents args)))))
+; Similarly for the line containing (apply proc-top-type (map contents args))
