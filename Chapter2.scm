@@ -2013,13 +2013,13 @@ t; install-rectangular-package. The resulting magnitude for
 ; accept raw value with no type information
 ; returns raised value with no type information
 ; add to scheme-number package
-(put 'raise 'integer (lambda (i)
+(put 'raise '(integer) (lambda (i)
 		       (make-rational i 1)))
 ; add to rational package
-(put 'raise 'rational (lambda (q)
+(put 'raise '(rational) (lambda (q)
 			(/ (numer q) (denom q))))
 ; add to real package
-(put 'raise 'real (lambda (r)
+(put 'raise '(real) (lambda (r)
 		    (make-complex-from-real-imag r 0)))
 (define (raise x) (apply-generic 'raise x)))
 
@@ -2073,3 +2073,26 @@ t; install-rectangular-package. The resulting magnitude for
 		  (error
 		   "No method for these types -- APPLY-GENERIC"
 		   (list op type-tags)))))))))
+; 2.85
+; install in complex package
+(put 'project '(omplex)
+     (lambda (x)
+       (make-scheme-number (real-part x))))
+; install in scheme-number package
+(put 'project '(scheme-number)
+     (lambda (x)
+       (let ((y (inexact->exact x)))
+	 (cond ((rational? y) (make-rational (numerator y) (denominator y)))
+	       ((integer? y) (make-rational y 1))
+	       (else (make-rational (truncate y) 1))))))
+; add to rational package	       
+(put 'project '(rational)
+     (lambda (x)
+       (make-integer (truncate (/ (numer x) (denom x))))))
+(define (drop x)
+  (let ((proj (get 'project (type-tag x))))
+    (if proj
+	(if (equ? x (proj x))
+	    #t
+	    #f)
+	#f)))
