@@ -111,3 +111,20 @@
 ; In the above implementation, all the password-checking is done by password-verifier. This frees
 ; up dispatch to call password-verifier and then proceed to either dispatch or return the result of
 ; password-verifier.
+
+(define (monte-carlo trials experiment)
+  (define (iter trials-remaining trials-passed)
+    (cond ((= trials-remaining 0)
+	   (/ trials-passed trials))
+	  ((experiment)
+	   (iter (- trials-remaining 1) (+ trials-passed 1)))
+	  (else
+	   (iter (- trials-remaining 1) trials-passed))))
+  (iter trials 0))
+
+; 3.5
+(define (estimate-integral P x1 x2 y1 y2 trials))
+
+(define (random-in-range low high)
+  (let ((range (- high low)))
+    (+ low (random range))))
