@@ -123,7 +123,12 @@
   (iter trials 0))
 
 ; 3.5
-(define (estimate-integral P x1 x2 y1 y2 trials))
+(define (predicate x y)
+  (<= (+ (square x) (square y)) 3))
+(define (estimate-integral P x1 x2 y1 y2 trials)
+  (define (experiment)
+    (P (random-in-range x1 x2) (random-in-range y1 y2)))
+  (monte-carlo trials experiment))
 
 (define (random-in-range low high)
   (let ((range (- high low)))
