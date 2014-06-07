@@ -124,12 +124,26 @@
 
 ; 3.5
 (define (predicate x y)
-  (<= (+ (square x) (square y)) 3))
+  (<= (+ (square x) (square y)) 1))
 (define (estimate-integral P x1 x2 y1 y2 trials)
   (define (experiment)
     (P (random-in-range x1 x2) (random-in-range y1 y2)))
   (monte-carlo trials experiment))
-
 (define (random-in-range low high)
   (let ((range (- high low)))
     (+ low (random range))))
+
+; the rectangular region has corners in each quadrant at plus or minus unity. THe unit circle is centerd at the origin and touches each axis at plus or minus unity. The total area of the rectangle is 4 units squared. The total area of the unit circle is pi. Hence, our experiment will approximate pi/4. Therefore, to estimate pi we must multiply the proportion of our monte-carlo experiment successes with four.
+(* 4.0 (estimate-integral predicate -1.0 1.0 -1.0 1.0 10000000))
+; evaluating the above gives 3.1417596
+
+; 3.6
+; for the purposes of testing, choose random-init to be 0, and rand-update as an incrementer
+(define random-init 0)
+(define (rand-update x)
+  (+ x 1))
+(define (rand cmd)
+  (let ((x random-init))
+    (lambda ()
+      (set! x (rand-update x))
+      x)))
