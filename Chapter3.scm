@@ -152,3 +152,20 @@
 	     (lambda (new-value) (begin (set! x new-value)
 					x)))))
     dispatch))
+
+; 3.7
+; Using make-account from exercise 3.3 (unchanged):
+(define (make-joint base-account base-password password)
+  (lambda (newpass cmd)
+    (cond ((not (eq? password newpass)) (lambda (x) "Wrong joint password"))
+	  (else (base-account base-password cmd)))))
+
+(define peter-acc (make-account 100 'open-sesame))
+(define paul-acc
+  (make-joint peter-acc 'open-sesame 'rosebud))
+(define hacker-acc
+  (make-joint peter-acc 'wrongpass 'hackerpass))
+((peter-acc 'open-sesame 'withdraw) 10)
+((paul-acc 'rosebud 'withdraw) 10)
+; the hacker should fail at attempting to access peter's account
+((hacker-acc 'hackerpass 'withdraw) 9000)
