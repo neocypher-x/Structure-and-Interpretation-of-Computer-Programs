@@ -169,3 +169,11 @@
 ((paul-acc 'rosebud 'withdraw) 10)
 ; the hacker should fail at attempting to access peter's account
 ((hacker-acc 'hackerpass 'withdraw) 9000)
+
+; 3.8
+(define f
+  (let ((a 0))
+    (lambda (x)
+      (let ((b a))
+	(set! a (+ x a))
+	b))))
