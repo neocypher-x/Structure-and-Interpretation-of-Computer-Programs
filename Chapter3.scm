@@ -179,6 +179,58 @@
 	b))))
 
 ; 3.9
+;
+;        parameters: n
+;        body:       (if (= n 1)
+;                    1
+;                    (* n factorial (- n 1)))
+;                          ^
+;                         _|_   ___
+;                        / . \ / . \__
+;                        \__/  \__/   |
+;                            ^        |
+;              ______________|________v____________________________
+; global      |              |                                     |
+; env  ---->  |factorial:____|                                     |
+;             |____________________________________________________|
+;               ^               ^                              ^
+;              _|_             _|_                            _|_
+;         E1->|n:6|       E2->|n:5|            ...       E6->|n:1|
+;             |___|           |___|                          |___|
+;
+;      (if (= n 1)             ...             ...            ...
+;          1
+;          (* n factorial (- n 1)))     
+
+
+
+;
+;        parameters: n                  parameters: product, counter, max-count
+;        body:       (fact-iter 1 1 n)  body:       (if (> counter max-count)
+;                          ^                            product
+;                          |                            (fact-iter (* counter product)
+;                          |                          ^            (+ counter 1)
+;                          |                          |            (max-count)))
+;                         _|_   ___                  _|_   ___
+;                        / . \ / . \__              / . \ / . \_     
+;                        \__/  \__/   |             \__/  \__/  |
+;                            ^        |                 ^       |
+;              ______________|________v_________________|_______v__
+; global      |              |                          |          |
+; env  ---->  |factorial:____|                          |          |<--------------+
+;             |fact-iter:_______________________________|          |               |
+;             |____________________________________________________|               |
+;               ^                   ^                    ^                         |
+;              _|_             _____|_____          _____|_____               _____|_____
+;         E1->|n:6|       E2->|product:1  |    E3->|product:1  |         E8->|product:720|
+;             |___|           |count:1    |        |count:2    |    ...      |count:7    |
+;                             |max-count:6|        |max-count:6|             |max-count:6|
+;      (fact-iter 1 1 n)      |___________|        |___________|             |___________|
+;     
+;                           body of fact-iter    body of fact-iter  ...           ...
+;                          
+;                              
+;
 
 ; 3.10
 (define (make-withdraw initial-amount)
