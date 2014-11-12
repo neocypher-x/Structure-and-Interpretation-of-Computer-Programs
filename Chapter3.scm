@@ -486,3 +486,34 @@
 ;      _ v__               __v__
 ;     |  c  |             |  d  |
 ;     |_____|             |_____|
+
+; 3.13
+; this implementation of last-pair doesn't support improper lists
+(define (last-pair x)
+  (if (null? (cdr x))
+      x
+      (last-pair (cdr x))))
+(last-pair '(a b))
+; does not work
+(last-pair (cons 'a 'b))
+(last-pair (cons 1 2))
+
+(define (make-cycle x)
+  (set-cdr! (last-pair x) x)
+  x)
+
+(define z (make-cycle (list 'a 'b 'c)))
+
+; trying to compute (last-pair z) results in finite recursion.
+;
+;
+;   ___________________________________________________________________
+;  |                                                                   |
+;  |    ____________      ______ _____      ______ _____      ______ __|__
+;  +-->|      |     |    |      |     |    |      |     |    |      |  |  |
+;  z-->|  o   |  o--|--->|   o  |  o--|--->|  o   |  o--|--->|  o   |  o  |
+;      |__|___|_____|    |___|__|_____|    |__|___|_____|    |__|___|_____|
+;         |                  |                |                 |
+;       _ v__              __v__            __v__             __v__
+;      |  a  |            |  d  |          |  c  |           |  d  |
+;      |_____|            |_____|          |_____|           |_____|
