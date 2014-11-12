@@ -74,9 +74,11 @@
 		call-the-cops
 		(lambda (x) "Incorrect password")))))
     dispatch))
-; In the above implementation, dispatch is responsible for verifying the password as well as
-; keeping track of incorrect password attempts. This way, none of the actual procedures such as
-; withdraw and deposit need to know about password attempts.
+; In the above implementation, dispatch is responsible for 
+; verifying the password as well as keeping track of 
+; incorrect password attempts. This way, none of the actual 
+; procedures such as withdraw and deposit need to know about 
+;password attempts.
 
 (define (make-account balance password)
   (define (withdraw amount)
@@ -108,9 +110,10 @@
 			       m)))
 	    password-check)))
     dispatch))
-; In the above implementation, all the password-checking is done by password-verifier. This frees
-; up dispatch to call password-verifier and then proceed to either dispatch or return the result of
-; password-verifier.
+; In the above implementation, all the password-checking is done by 
+; password-verifier. This frees up dispatch to call 
+; password-verifier and then proceed to either dispatch or return 
+; the result of password-verifier.
 
 (define (monte-carlo trials experiment)
   (define (iter trials-remaining trials-passed)
@@ -133,7 +136,13 @@
   (let ((range (- high low)))
     (+ low (random range))))
 
-; the rectangular region has corners in each quadrant at plus or minus unity. THe unit circle is centerd at the origin and touches each axis at plus or minus unity. The total area of the rectangle is 4 units squared. The total area of the unit circle is pi. Hence, our experiment will approximate pi/4. Therefore, to estimate pi we must multiply the proportion of our monte-carlo experiment successes with four.
+; the rectangular region has corners in each quadrant at plus or 
+; minus unity. THe unit circle is centerd at the origin and 
+; touches each axis at plus or minus unity. The total area of the 
+; rectangle is 4 units squared. The total area of the unit circle 
+; is pi. Hence, our experiment will approximate pi/4. Therefore, 
+; to estimate pi we must multiply the proportion of our 
+; monte-carlo experiment successes with four.
 (* 4.0 (estimate-integral predicate -1.0 1.0 -1.0 1.0 10000000))
 ; evaluating the above gives 3.1417596
 
@@ -187,7 +196,7 @@
 ;                          ^
 ;                         _|_   ___
 ;                        / . \ / . \__
-;                        \__/  \__/   |
+;                        \___/ \___/  |
 ;                            ^        |
 ;              ______________|________v____________________________
 ; global      |              |                                     |
@@ -213,7 +222,7 @@
 ;                          |                          |            (max-count)))
 ;                         _|_   ___                  _|_   ___
 ;                        / . \ / . \__              / . \ / . \_     
-;                        \__/  \__/   |             \__/  \__/  |
+;                        \___/ \___/  |             \___/ \___/ |
 ;                            ^        |                 ^       |
 ;              ______________|________v_________________|_______v__
 ; global      |              |                          |          |
@@ -252,3 +261,96 @@
 		  balance)
 	   "Insufficient funds")))
    initial-amount))
+
+;=================================================================
+; evaluating (define W1 (make-withdraw 100)) gives the following:
+;-----------------------------------------------------------------
+;        parameters: initial-amount
+;        body:       ((lambda (balance)
+;                       (lambda (amount)
+;                         (if (>= balance amount)
+;        		      (begin (set! balance (- balance amount))
+;				     balance)
+;	         	      "Insufficient funds")))
+;                     initial-amount)
+;                              ^
+;                             _|_   ___
+;                            / . \ / . \__
+;                            \___/ \___/  |
+;                                ^        |
+;              __________________|________v____________________________
+; global      |                  |                                     |
+; env  ---->  |make-withdraw:____|                                     |
+;             |W1:---+                                                 |
+;             |______|_________________________________________________|
+;                    |                                   ^
+;                    |                                   |
+;                 ___v ___      ___________      ________|_________
+;                / . \/ . \--->|balance:100|--->|initial-amount:100|
+;                \___/\___/    |___________|    |__________________|
+;                  |                 E2                  E1
+;                  |
+;                  v
+;        parameters: amount
+;        body:       (if (>= balance amount)
+;                        (begin (set! balance (- balance amount))
+;                               balance)
+;                        "Insufficient funds")
+
+
+;=====================================================================
+; evaluating (W1 50) gives the following:
+; (the only real change is the addition of a new environment
+; containing the amount)
+;--------------------------------------------------------------------
+;
+;              ________________________________________________________
+; global      |                                                        |
+; env  ---->  |make-withdraw: ...                                      |
+;             |W1:---+                                                 |
+;             |______|_________________________________________________|
+;                    |                                   ^
+;                    |                                   |
+;                 ___v ___      _____E2____      ________|_________
+;                / . \/ . \--->|balance:100|--->|initial-amount:100|
+;                \___/\___/    |___________|    |__________________|
+;                  |                 ^                   E1
+;                  |            _____|_____
+;                  |           |amount:50  |E3
+;                  |           |___________|
+;                  v
+;        parameters: amount
+;        body:       (if (>= balance amount)
+;                         ---
+
+;================================================================
+; evaluating (define W2 (make-withdraw 100)) gives the following:
+;----------------------------------------------------------------
+;
+;
+;              ________________________________________________________
+; global      |                                                        |
+; env  ---->  |make-withdraw: ...                                      |
+;        +----|W1:                                                     |
+;        |    |W2:-----------------------+                             |
+;        |    |__________________________|_____________________________|
+;        |              ^                |                  ^
+;        |     _________|________        |         _________|________
+;        |  E1|initial-amount:100|       |      E3|initial-amount:100|
+;        |    |__________________|       |        |__________________|
+;        |              ^                |                  ^
+;        |         _____|_____           |             _____|_____
+;        |      E2|balance:50 |          |          E4|balance:100|
+;        |        |___________|          |            |___________|
+;        |              ^                |                  ^
+;        |        ___  _|_            ___v ___              |
+;        +-----> / . \/ . \          / . \/ . \_____________|
+;                \___/\___/          \___/\___/
+;                  |                   |
+;                  |                   |
+;                  |                   |
+;                  v                   v
+;        parameters: amount
+;        body:       (if (>= balance amount)
+;                        (begin (set! balance (- balance amount))
+;                        ...
