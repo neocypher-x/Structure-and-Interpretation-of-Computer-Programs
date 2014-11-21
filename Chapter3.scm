@@ -659,3 +659,15 @@
 ;      |  1  |          |  2  |          |  3  |
 ;      |_____|          |_____|          |_____|
 ;
+
+(define (count-pairs x)
+  (define (recurse-pairs list seen-list)
+    (+ (count-pairs-iter (car list) seen-list)
+       (count-pairs-iter (cdr list) seen-list)))
+  (define (count-pairs-iter list seen-list)
+    (cond ((not (pair? list)) 0)
+	  ((memq list seen-list) (recurse-pairs list seen-list))
+	  (else (begin (set! seen-list (cons list seen-list))
+		       (+ (recurse-pairs list seen-list)
+			  1)))))
+  (count-pairs-iter x ()))
