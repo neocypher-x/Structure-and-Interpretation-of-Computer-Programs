@@ -608,6 +608,8 @@
 (define y7 (cons x7 x7)) ; ((1) 1)
 (define z7 (cons y7 y7)) ; (((1) 1) (1) 1)
 ; a list with a cycle would cause the method to never return
+(define xinf (cons 1 (cons 2 (cons 3 ()))))
+(set-cdr! (last-pair xinf) xinf)
 
 ;       ___________      _____ _____      _____ _____ 
 ;      |     |     |    |     |     |    |     |   //|
