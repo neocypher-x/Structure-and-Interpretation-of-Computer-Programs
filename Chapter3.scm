@@ -660,6 +660,7 @@
 ;      |_____|          |_____|          |_____|
 ;
 
+; 3.17
 (define (count-pairs x)
   (define (recurse-pairs list seen-list)
     (+ (count-pairs-iter (car list) seen-list)
@@ -671,3 +672,81 @@
 		       (+ (recurse-pairs list seen-list)
 			  1)))))
   (count-pairs-iter x ()))
+;; note that the version above does not work because seen-list
+;; gains local scope in each the two function bodies. In other
+;; words, set! in count-pairs-iter modifies the local copy of
+;; seen-list.
+
+;; memq uses eq? to test for equality, it is the strictest
+;; of the equality predicates.
+(define (count-pairs x)
+  (let ((seen-list ()))
+    (define (recurse-pairs list)
+      (+ (count-pairs-iter (car list))
+	 (count-pairs-iter (cdr list))))
+    (define (count-pairs-iter list)
+      (cond ((not (pair? list)) 0)
+	    ((memq list seen-list) (recurse-pairs list))
+	    (else (begin (set! seen-list (cons list seen-list))
+			 (+ (recurse-pairs list)
+			    1)))))
+    (count-pairs-iter x)))
+
+;; The version below properly exits when it detects a loop.
+;; Therefore this is "more" correct than the version above.
+(define (count-pairs x)
+  (let ((seen-list ()))
+    (define (count-pairs-iter y)
+      (cond ((not (pair? y)) 0)
+	    ((memq y seen-list) 0)
+	    (else (begin (set! seen-list (cons y seen-list))
+			 (+ (count-pairs-iter (car y))
+			    (count-pairs-iter (cdr y))
+			    1)))))
+    (count-pairs-iter x)))
+
+; 3.18
+; We use an external storage structure, seen-list to record
+; what we've seen as we traverse the list. If we have not
+; seen the current list, append it to the seen-list and recurse.
+(define (contains-cycle? x)
+  (let ((seen-list ()))
+    (define (contains-cycle?-iter y)
+      (cond ((not (pair? y)) #f)
+	    ((memq y seen-list) #t)
+	    (else (begin (set! seen-list (cons y seen-list))
+			 (contains-cycle?-iter (cdr y))))))
+    (contains-cycle?-iter x)))
+
+; 3.19
+(define (make-cycle x)
+  (set-cdr! (last-pair x) x)
+  x)
+
+(make-cycle (list 1 2 3))
+
+(define x (list 1 2 3 ))
+(set-cdr! (last-pair x) x)
+(eq? (car x)
+     (car (cdr (cdr (cdr x)))))
+
+; if there exists a cycle, then there exists an n such that
+; every n elements in the list return true for eq?. But this
+; is hard to verify in finite time. Thus, we think of an
+; algebraic or closed-form solution to checking for cycles,
+; namely if any cdr's of the list point to the list itself.
+; note that pair? returns false on empty list.
+
+; Apparently this solution only works if the cdr points to
+; the list itself, and doesn't detect the cdr of any element
+; in the list pointing to any other element in the list.
+; This solution does require only constant space however,
+; thanks to tail recursion.
+(define (contains-cycle? x)
+  (define (contains-cycle?-iter y)
+    (if (not (pair? y))
+	#f
+	(if (eq? x (cdr y))
+	    #t
+	    (contains-cycle?-iter (cdr y)))))
+  (contains-cycle?-iter x))
