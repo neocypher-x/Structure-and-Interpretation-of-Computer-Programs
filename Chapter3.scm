@@ -815,6 +815,12 @@
 ; E6-->|m: 'set-car |    E7-->|v: 17 |     E5-->|m: 'cdr |
 ;      |____________|         |______|          |________|
 ;     call to dispatch     call to set-x!    call to dispatch
+;
+; Note that environments four and five serve the purpose of 
+; returning the value of the expression (cdr z) used as the first
+; argument to the call to set-car! in environment three.
+; Environments six and seven follow from evaluating the body of
+; set-car! from environment 3.
 
 
 ;  evluating (car x) gives
