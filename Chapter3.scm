@@ -884,3 +884,24 @@
 ; ((b) b)
 (delete-queue! q1)
 ; (() b)
+
+; Eva means that the Lisp interpretor prints the queue's 
+; internal representation and not what the queue is actually 
+; representing. Ben's examples produce the printed results 
+; as they are because the internal representation of our 
+; queue takes the form above, as the cons of a list with an 
+; element that may happen to be in that list (which explains 
+; why it seems the last element was inserted twice). The 
+; actual queue that the internal respresentation represents 
+; is contained in the first element of that cons. The second 
+; element of that cons is updated as elements are inserted, 
+; but not as elements are removed. Hence, even though the 
+; queue is empty, the second element in the internal 
+; representation still points to something. If we want to 
+; print what queue is actually being represented by our 
+; implementation, we'd have to provide a procedure so that 
+; the Lisp interpretor would know how to deal with our 
+; internal representation of our queue representation.
+
+(define (print-queue queue)
+  (display (front-ptr queue)))
