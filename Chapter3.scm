@@ -751,6 +751,31 @@
 	    (contains-cycle?-iter (cdr y)))))
   (contains-cycle?-iter x))
 
+; Use two pointers that traverse the list at different rates.
+(define (contains-cycle? x)
+  (cond ((null? x) #f)
+	((not (list? x)) #f)
+	(else
+	 (let ((a (cdr x)))
+	   (if (null? x)
+	       #f
+	       #t)))))
+
+(define l1 '(1 2 3))
+(define l2 '(1 2 3))
+(set-cdr! l2 l2)
+	       
+
+(define (contains-cycle? x)
+  (let* ((a (cdr x))
+	 (b (cdr a)))
+    (if (null? b)
+	't
+	'f)))
+
+(define (contains-cycle? x)
+  (let ((a ()))))
+
 ; 3.20
 ;  evaluating (define x (cons 1 2)) and
 ;             (define z (cons x x)) gives
