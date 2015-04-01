@@ -722,14 +722,11 @@
 (define (make-cycle x)
   (set-cdr! (last-pair x) x)
   x)
-
 (make-cycle (list 1 2 3))
 
-(define x (list 1 2 3 ))
-(set-cdr! (last-pair x) x)
-(eq? (car x)
-     (car (cdr (cdr (cdr x)))))
-
+(define l1 '(1 2 3))
+(define l2 '(1 2 3))
+(set-cdr! (last-pair l2) l2)
 ; if there exists a cycle, then there exists an n such that
 ; every n elements in the list return true for eq?. But this
 ; is hard to verify in finite time. Thus, we think of an
@@ -751,30 +748,25 @@
 	    (contains-cycle?-iter (cdr y)))))
   (contains-cycle?-iter x))
 
+; A very clever solution:
 ; Use two pointers that traverse the list at different rates.
+; The iterative function is recursive and thus generates
+; a call stack that is not constant in length. However,
+; no external storage structure is no needed so in that sense
+; it has constant space complexity.
 (define (contains-cycle? x)
-  (cond ((null? x) #f)
-	((not (list? x)) #f)
+  (cond ((not (pair? x)) #f) ; using list? returns #f for l2 for some reason
+	((null? x) #f)
+	(else (contains-cycle?-iter x (cdr x)))))
+
+(define (contains-cycle?-iter x y)
+  (cond ((null? y) #f)
+	((eq? x y) #t)
 	(else
-	 (let ((a (cdr x)))
-	   (if (null? x)
+	 (let ((a (cdr y)))
+	   (if (null? y)
 	       #f
-	       #t)))))
-
-(define l1 '(1 2 3))
-(define l2 '(1 2 3))
-(set-cdr! l2 l2)
-	       
-
-(define (contains-cycle? x)
-  (let* ((a (cdr x))
-	 (b (cdr a)))
-    (if (null? b)
-	't
-	'f)))
-
-(define (contains-cycle? x)
-  (let ((a ()))))
+	       (contains-cycle?-iter (cdr x) (cdr a)))))))
 
 ; 3.20
 ;  evaluating (define x (cons 1 2)) and
