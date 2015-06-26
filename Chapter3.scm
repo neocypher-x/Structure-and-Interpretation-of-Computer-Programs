@@ -861,7 +861,7 @@
 
 ; helpers
 (define (front-ptr queue) (car queue))
-(define (rear-ptr queue) (cdr queue))
+(define (rear-ptr queue) (cdr queue))pp
 (define (set-front-ptr! queue item) (set-car! queue item))
 (define (set-rear-ptr! queue item) (set-cdr! queue item))
 
@@ -978,5 +978,3 @@
 (delete-queue! q1)
 (empty-queue? q1)
 ; #t
-
-; # hi qun
