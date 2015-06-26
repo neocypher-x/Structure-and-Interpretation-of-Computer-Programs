@@ -978,3 +978,5 @@
 (delete-queue! q1)
 (empty-queue? q1)
 ; #t
+
+; # hi qun
