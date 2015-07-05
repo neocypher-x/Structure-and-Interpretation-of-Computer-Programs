@@ -764,7 +764,7 @@
 	((eq? x y) #t)
 	(else
 	 (let ((a (cdr y)))
-	   (if (null? y)
+	   (if (null? a)
 	       #f
 	       (contains-cycle?-iter (cdr x) (cdr a)))))))
 
@@ -978,3 +978,70 @@
 (delete-queue! q1)
 (empty-queue? q1)
 ; #t
+
+; empty deque
+(define l (cons () ()))
+
+; one element
+(define m1 (cons 'a ()))
+(define n1 (cons m1 ()))
+(set-car! l n1)
+(set-cdr! l n1)
+; access first element
+(car (car (car l)))
+; access last element
+(car (car (cdr l)))
+; try to access second element (returns ())
+(cdr (car l))
+
+; two elements (push at end)
+(define m2 (cons 'b n1))
+(define n2 (cons m2 ()))
+(set-cdr! n1 n2)
+(set-cdr! l n2)
+; access first element
+(car (car (car l)))
+; access last element
+(car (car (cdr l)))
+; access second element
+(car (car (cdr (car l))))
+
+; three elements (push at end)
+(define m3 (cons 'c n2))
+(define n3 (cons m3 ()))
+(set-cdr! n2 n3)
+(set-cdr! l n3)
+; access first element
+(car (car (car l)))
+;access last element
+(car (car (cdr l)))
+
+; four elements (push at start)
+(define m0 (cons 0 ()))
+(define n0 (cons m0 n1))
+(set-cdr! (car (car l)) n0)
+(set-car! l n0)
+
+; helpers
+(define (front-ptr deque) (car deque))
+(define (rear-ptr deque) (cdr deque))
+(define (set-front-ptr! deque item) (set-car! deque item))
+(define (set-rear-ptr! deque item) (set-cdr! deque item))
+
+(define (make-deque) (cons '() '()))
+(define (empty-deque? deque) (null? (car deque)))
+(define (front-deque deque)
+  (if (empty-queue? deque)
+      (error "FRONT called with an empty deque" deque)
+      (car (car (front-ptr deque)))))
+(define (rear-deque deque)
+  (if (empty-queue? deque)
+      (error "REAR called with an empty deque" deque)
+      (car (car (rear-ptr deque)))))
+(define (front-insert-deque! deque) ())
+(define (rear-insert-deque! deque) ())
+(define (front-delete-deque! deque) ())
+(define (rear-delete-deque! deque) ())
+
+(define d (make-deque))
+(empty-deque? d)
