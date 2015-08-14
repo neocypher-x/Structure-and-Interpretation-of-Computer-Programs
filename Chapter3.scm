@@ -979,6 +979,7 @@
 (empty-queue? q1)
 ; #t
 
+; 3.23
 ; empty deque
 (define l (cons () ()))
 
@@ -1031,17 +1032,39 @@
 (define (make-deque) (cons '() '()))
 (define (empty-deque? deque) (null? (car deque)))
 (define (front-deque deque)
-  (if (empty-queue? deque)
+  (if (empty-deque? deque)
       (error "FRONT called with an empty deque" deque)
       (car (car (front-ptr deque)))))
 (define (rear-deque deque)
-  (if (empty-queue? deque)
+  (if (empty-deque? deque)
       (error "REAR called with an empty deque" deque)
       (car (car (rear-ptr deque)))))
-(define (front-insert-deque! deque) ())
-(define (rear-insert-deque! deque) ())
+(define (front-insert-deque! deque item) ; must consider empty deque case
+  (let ((backward-node (cons item '())))
+    (let ((forward-node (cons backward-node (front-ptr deque))))
+      (if (empty-deque? deque)
+	  (begin
+	    (set-car! deque forward-node)
+	    (set-cdr! deque forward-node))
+	  (begin
+	    (set-cdr! (car (car deque)) forward-node)
+	    (set-car! deque forward-node))))))
+(define (rear-insert-deque! deque item)
+  (let ((backward-node (cons item (rear-ptr deque))))
+    (let ((forward-node (cons backward-node '())))
+      (if (empty-deque? deque)
+	  (begin
+	    (set-car! deque forward-node)
+	    (set-cdr! deque forward-node))
+	  (begin
+	    (set-cdr! (cdr deque) forward-node)
+	    (set-cdr! deque forward-node))))))
 (define (front-delete-deque! deque) ())
 (define (rear-delete-deque! deque) ())
 
 (define d (make-deque))
 (empty-deque? d)
+(rear-insert-deque! d 'a)
+(front-insert-deque! d 0)
+(front-deque d)
+(rear-deque d)
