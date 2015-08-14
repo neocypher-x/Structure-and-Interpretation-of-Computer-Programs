@@ -980,6 +980,36 @@
 ; #t
 
 ; 3.23
+
+;                      deque
+;                        |
+;                        |
+;                   _____v_____
+;                  |     |     |
+;                  |  o  |  o--|-------------------------------+                  
+;                  |__|__|_____|                               |
+;                     |                                        |
+;                     +--+                                     |
+;                        |                                     |
+;                   _____v_____        _____ _____        _____v_____ 
+;                  |     |     |      |     |     |      |     |   //|
+;  forward nodes-->|  o  |  o--|----->|  o  |  o--|----->|  o  |  /  |
+;                  |__|__|_____|      |__|__|_____|      |__|__|//___|
+;                     |  ^               |  ^               |   
+;                     |  |               |  |               |
+;                     |  +-------+       |  +----------+    |
+;                     |          |       |             |    |     
+;                   __v________  |     __v__ _____     |  __v__ _____
+;                  |     |   //| |    |     |     |    | |     |     |
+; backward nodes-->|  o  |  /  | |    |  o  |  o--|-+  | |  o  |  o--|-+
+;                  |__|__|//___| |    |__|__|_____| |  | |__|__|_____| |
+;                     |          |       |          |  |    |          |
+;                   __v__        |     __v__        |  |  __v__        |
+;                  |  a  |       |    |  b  |       |  | |  c  |       |
+;                  |_____|       |    |_____|       |  | |_____|       |
+;                                |                  |  |               |
+;                                +------------------+  +---------------+
+
 ; empty deque
 (define l (cons () ()))
 
@@ -1023,7 +1053,7 @@
 (set-cdr! (car (car l)) n0)
 (set-car! l n0)
 
-; helpers
+; generalizing the above in functions
 (define (front-ptr deque) (car deque))
 (define (rear-ptr deque) (cdr deque))
 (define (set-front-ptr! deque item) (set-car! deque item))
@@ -1039,7 +1069,7 @@
   (if (empty-deque? deque)
       (error "REAR called with an empty deque" deque)
       (car (car (rear-ptr deque)))))
-(define (front-insert-deque! deque item) ; must consider empty deque case
+(define (front-insert-deque! deque item)
   (let ((backward-node (cons item '())))
     (let ((forward-node (cons backward-node (front-ptr deque))))
       (if (empty-deque? deque)
@@ -1057,14 +1087,38 @@
 	    (set-car! deque forward-node)
 	    (set-cdr! deque forward-node))
 	  (begin
-	    (set-cdr! (cdr deque) forward-node)
+	    (set-cdr! (rear-ptr deque) forward-node)
 	    (set-cdr! deque forward-node))))))
-(define (front-delete-deque! deque) ())
-(define (rear-delete-deque! deque) ())
+(define (front-delete-deque! deque)
+  (if (empty-deque? deque)
+      (error "FRONT-DELETE called with an empty deque" deque)
+      (begin
+	(set-front-ptr! deque (cdr (front-ptr deque)))
+	(if (null? (front-ptr deque))
+	    (set-rear-ptr! deque '())
+	    (set-cdr! (car (front-ptr deque)) '())))))
+(define (rear-delete-deque! deque)
+  (if (empty-deque? deque)
+      (error "REAR-DELETE called with an empty deque" deque)
+      (begin
+	(set-rear-ptr! deque (cdr (car (rear-ptr deque))))
+	(if (null? (rear-ptr deque))
+	    (set-front-ptr! deque '())
+	    (set-cdr! (rear-ptr deque) '())))))
 
+; tests
 (define d (make-deque))
 (empty-deque? d)
+; #t
+
+; represent (2 1 0 a b c)
 (rear-insert-deque! d 'a)
+(rear-insert-deque! d 'b)
+(rear-insert-deque! d 'c)
 (front-insert-deque! d 0)
+(front-insert-deque! d 1)
+(front-insert-deque! d 2)
 (front-deque d)
 (rear-deque d)
+(front-delete-deque! d)
+(rear-delete-deque! d)
