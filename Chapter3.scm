@@ -1253,3 +1253,73 @@
 ; test
 (put 'red 'a 1)
 (get 'red 'a)
+
+; 3.25
+; just putting assoc here from the book
+(define (assoc key records)
+  (cond ((null? records) false)
+	((equal? key (caar records)) (car records))
+	(else (assoc key (cdr records)))))
+
+; one attempt
+(define (lookup keys table)
+  (define (table? x)
+    (if (list? x)
+	true
+	false))
+  (cond ((not (table? table)) false)
+        ; base case, 1 key left
+	((null? (cdr keys))
+	 (let ((record (assoc (car keys) (cdr table))))
+	   (if record
+	       (cdr record)
+	       false)))
+	; > 1 key in the keys list
+	(else (let ((subtable (assoc (car keys) (cdr table))))
+		(if subtable
+		    (lookup (cdr keys) subtable)
+		    false)))))
+
+; debug version
+(define (lookup keys table)
+  (define (lookup-recur keys subtable)
+    (write "new call") (newline)
+    (write keys) (newline)
+    (write subtable) (newline)
+    (cond ((null? keys) subtable)
+	  ((not (list? subtable)) false)
+	  (else (let ((subsubtable (assoc (car keys) subtable)))
+		  (write 'body)
+		  (write keys) (newline)
+		  (write subsubtable) (newline)
+		  (if subsubtable
+		      (lookup-recur (cdr keys) (cdr subsubtable))
+		      false)))))
+  (lookup-recur keys (cdr table)))
+
+; release version
+(define (lookup keys table)
+  (define (lookup-recur keys subtable)
+    (cond ((null? keys) subtable)
+	  ((not (list? subtable)) false)
+	  (else (let ((subsubtable (assoc (car keys) subtable)))
+		  (if subsubtable
+		      (lookup-recur (cdr keys) (cdr subsubtable))
+		      false)))))
+  (lookup-recur keys (cdr table)))
+
+
+; 1-d table test
+(define t (list '*table* (cons 'a 1)))
+(lookup (list 'a) t)
+(lookup (list 'b) t)
+
+; 2-d table test
+(define t (list '*table*
+		(list 'a (cons 'red 1) (cons 'blue 2))
+		(list 'b (cons 'red 3) (cons 'blue 4))))
+(lookup (list 'a 'red) t)
+(lookup (list 'b 'blue) t)
+(lookup (list 'b 'blue 'no-key) t)
+(define (insert! keys value table))
+
