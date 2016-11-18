@@ -1258,6 +1258,7 @@
 ; just putting assoc here from the book
 (define (assoc key records)
   (cond ((null? records) false)
+	((not (list? records)) false)
 	((equal? key (caar records)) (car records))
 	(else (assoc key (cdr records)))))
 
@@ -1308,7 +1309,6 @@
 		      false)))))
   (lookup-recur keys (cdr table)))
 
-
 ; 1-d table test
 (define t (list '*table* (cons 'a 1)))
 (lookup (list 'a) t)
@@ -1323,3 +1323,53 @@
 (lookup (list 'b 'blue 'no-key) t)
 (define (insert! keys value table))
 
+; starting clean here, 3rd attempt
+; modify assoc with a new line
+(define (assoc key records)
+  (cond ((null? records) false)
+	((not (list? records)) false) ; added to handle case where there are more keys than records
+	((equal? key (caar records)) (car records))
+	(else (assoc key (cdr records)))))
+
+; uses the modified assoc function
+(define (lookup keys table)
+  ;(write keys) (newline)
+  ;(write table) (newline)
+  (if (null? keys)
+      (cdr table)
+      (let ((record (assoc (car keys) (cdr table))))
+	(if record
+	    (lookup (cdr keys) record)
+	    false))))
+
+; if you can't find it, just build the entire thing right there
+(define (build-table keys value)
+  (define (build-table-iter keys value)
+    ;(write keys) (newline)
+    ;(write value) (newline)
+    (if (null? (cdr keys))
+	(cons (car keys) value)
+	(list (car keys) (build-table-iter (cdr keys) value))))
+  (build-table-iter keys value))
+
+(define (build-table keys value)
+  ;(write keys) (newline)
+  ;(write value) (newline)
+  (if (null? (cdr keys))
+      (cons (car keys) value)
+      (list (car keys) (build-table (cdr keys) value))))
+
+(define (insert! keys value table)
+  (write keys) (newline)
+  (write table) (newline)
+  (if (null? keys)
+      (set-cdr! table value)
+      (let ((record (assoc (car keys) (cdr table))))
+	(if record
+	    (insert! (cdr keys) value record)
+	    (set-cdr! table (list (build-table keys value)))))))
+
+(insert! '(a red) 1 t)
+(insert! '(a blue) 2 t)
+(insert! '(b red) 3 t)
+(insert! '(b blue) 4 t)
